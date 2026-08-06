@@ -16,3 +16,21 @@ export const AGENT_INFO = {
 } as const;
 
 export const WHATSAPP_LINK = `https://wa.me/${AGENT_INFO.whatsapp}`;
+
+/**
+ * Las 8 aseguradoras con las que se trabaja. El documento fuente
+ * (mvp_arbol_decisiones_smart_form.md / copy_guion) menciona solo a
+ * National Life Group — es una de las 8, no la única opción para IUL. Solo
+ * se refleja en la landing (Sección 6), el resto del wizard sigue
+ * centrado en NLG (ver docs/superpowers/specs/2026-08-06-landing-page-design.md).
+ */
+export const INSURANCE_PARTNERS = [
+  "Ethos",
+  "Americo",
+  "Mutual of Omaha",
+  "National Life Group",
+  "F&G (Annuities & Life)",
+  "Corebridge Financial",
+  "Transamerica",
+  "Foresters Financial",
+] as const;
