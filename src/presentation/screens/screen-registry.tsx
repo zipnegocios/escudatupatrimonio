@@ -43,6 +43,7 @@ import { DispNow } from "@/presentation/screens/scheduling/DispNow";
 import { DispSched } from "@/presentation/screens/scheduling/DispSched";
 import { E5Contacto } from "@/presentation/screens/scheduling/E5Contacto";
 import { E5Final } from "@/presentation/screens/E5Final";
+import { LandingScreen } from "@/presentation/screens/landing/LandingScreen";
 
 export interface ScreenComponentProps {
   vars: QualificationProfile;
@@ -57,6 +58,7 @@ export type ScreenComponent = ComponentType<ScreenComponentProps>;
  * aún no existen caen al placeholder de SmartFormApp.
  */
 export const SCREEN_COMPONENTS: Partial<Record<ScreenId, ScreenComponent>> = {
+  LANDING: LandingScreen,
   E1_ENTRY: E1Entry,
   S1,
   Q_INT: QInt,
