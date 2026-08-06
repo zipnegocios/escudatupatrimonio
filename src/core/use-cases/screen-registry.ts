@@ -1,6 +1,7 @@
 import type { ScreenId } from "@/core/entities/screen-id";
 
 export type ScreenType =
+  | "landing"
   | "entry"
   | "decision"
   | "stimulation"
@@ -25,6 +26,7 @@ export interface ScreenMeta {
 }
 
 export const SCREEN_REGISTRY: Record<ScreenId, ScreenMeta> = {
+  LANDING: { type: "landing", progressLabel: null },
   E1_ENTRY: { type: "entry", progressLabel: null },
   S1: { type: "stimulation", progressLabel: null, minDurationMs: 3000, tapAdvanceAfterMs: 1500 },
   Q_INT: { type: "decision", progressLabel: "Paso 1 de 5" },

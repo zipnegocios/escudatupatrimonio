@@ -25,6 +25,9 @@ export function getNextScreen(
   vars: QualificationProfile
 ): NavResult {
   switch (current) {
+    case "LANDING":
+      return { nextScreen: "E1_ENTRY", varUpdates: {} };
+
     case "E1_ENTRY":
       return { nextScreen: "S1", varUpdates: {} };
 

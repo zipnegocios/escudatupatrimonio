@@ -6,6 +6,7 @@
  * compilación, no un callejón sin salida en tiempo de ejecución.
  */
 export type ScreenId =
+  | "LANDING"
   | "E1_ENTRY"
   | "S1"
   | "Q_INT"
