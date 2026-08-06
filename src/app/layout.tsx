@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "@/presentation/styles/globals.css";
 import { BRAND_NAME } from "@/presentation/constants";
+import { MetaPixelSlot } from "@/presentation/components/MetaPixelSlot";
 
 export const metadata: Metadata = {
   title: BRAND_NAME,
@@ -22,7 +23,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className="h-full">
-      <body className="h-full">{children}</body>
+      <body className="h-full">
+        <MetaPixelSlot />
+        {children}
+      </body>
     </html>
   );
 }
