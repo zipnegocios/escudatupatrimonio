@@ -21,6 +21,9 @@ interface FormState {
   currentScreen: ScreenId;
   history: ScreenId[];
   vars: QualificationProfile;
+  /** Valor crudo de ?utm_campaign= capturado por LANDING al montar. No es parte de QualificationProfile: es metadata de marketing efímera, no una de las 22 variables silenciosas que se envían a GHL. */
+  utmCampaign: string | null;
+  setUtmCampaign: (value: string | null) => void;
   setVar: <K extends keyof QualificationProfile>(key: K, value: QualificationProfile[K]) => void;
   setVars: (patch: Partial<QualificationProfile>) => void;
   navigate: (choiceId: string) => void;
@@ -32,9 +35,12 @@ export const useFormStore = create<FormState>()(
   persist(
     (set, get) => ({
       sessionId: createSessionId(),
-      currentScreen: "E1_ENTRY",
+      currentScreen: "LANDING",
       history: [],
       vars: INITIAL_QUALIFICATION_PROFILE,
+      utmCampaign: null,
+
+      setUtmCampaign: (value) => set({ utmCampaign: value }),
 
       setVar: (key, value) =>
         set((state) => ({ vars: { ...state.vars, [key]: value } })),
@@ -74,9 +80,10 @@ export const useFormStore = create<FormState>()(
       reset: () =>
         set({
           sessionId: createSessionId(),
-          currentScreen: "E1_ENTRY",
+          currentScreen: "LANDING",
           history: [],
           vars: INITIAL_QUALIFICATION_PROFILE,
+          utmCampaign: null,
         }),
     }),
     {
