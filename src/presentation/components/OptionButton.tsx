@@ -12,6 +12,8 @@ interface OptionButtonProps {
   selected?: boolean;
   /** Variante "muted" para opciones descalificantes que igual deben ser tappables (ej. Q_EDAD: <18, >70). */
   variant?: "default" | "muted";
+  /** Sugerencia visual no vinculante (ej. "Sugerido para ti" por UTM en Q_INT) — nunca implica selección ni auto-avance. */
+  badge?: string;
 }
 
 export function OptionButton({
@@ -21,6 +23,7 @@ export function OptionButton({
   onClick,
   selected = false,
   variant = "default",
+  badge,
 }: OptionButtonProps) {
   const ref = useRef<HTMLButtonElement>(null);
   const handlePress = attachTapScale(ref, onClick);
@@ -48,6 +51,11 @@ export function OptionButton({
       <div className="flex-1 min-w-0">
         <p className="type-label leading-tight">{label}</p>
         {sublabel && <p className="type-caption mt-0.5">{sublabel}</p>}
+        {badge && (
+          <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full bg-caution-bg text-caution type-caption">
+            {badge}
+          </span>
+        )}
       </div>
       {selected && (
         <span className="flex-shrink-0 w-5 h-5 rounded-full bg-gold-primary flex items-center justify-center">

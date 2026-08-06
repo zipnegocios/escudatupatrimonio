@@ -12,6 +12,7 @@ export interface DecisionOption {
   sublabel?: string;
   icon?: ReactNode;
   variant?: "default" | "muted";
+  badge?: string;
 }
 
 interface DecisionScreenProps {
@@ -75,6 +76,7 @@ export function DecisionScreen({
             label={opt.label}
             sublabel={opt.sublabel}
             variant={opt.variant}
+            badge={opt.badge}
             onClick={() => onSelect(opt.value)}
           />
         ))}
