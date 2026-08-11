@@ -51,7 +51,7 @@ export function LandingScreen({ onChoice }: ScreenComponentProps) {
       <LandingSection className="bg-bg-elevated">
         <SocialProof />
       </LandingSection>
-      <LandingSection className="bg-bg-trust-dark" width="narrow">
+      <LandingSection width="narrow">
         <FinalCTA onContinue={handleContinue} />
       </LandingSection>
       <WhatsAppFloatingButton />
