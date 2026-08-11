@@ -5,15 +5,17 @@ import { useFormStore } from "@/presentation/state/form-store";
 import { LandingWrapper } from "@/presentation/screens/landing/LandingWrapper";
 import { LandingSection } from "@/presentation/screens/landing/LandingSection";
 import { Hero } from "@/presentation/screens/landing/Hero";
+import { AuthorityBar } from "@/presentation/screens/landing/AuthorityBar";
 import { Problem } from "@/presentation/screens/landing/Problem";
 import { Solution } from "@/presentation/screens/landing/Solution";
+import { InstitutionalReframe } from "@/presentation/screens/landing/InstitutionalReframe";
 import { Process } from "@/presentation/screens/landing/Process";
-import { Testimonials } from "@/presentation/screens/landing/Testimonials";
-import { Credentials } from "@/presentation/screens/landing/Credentials";
-import { CTAButton } from "@/presentation/components/CTAButton";
+import { AuthorityVideos } from "@/presentation/screens/landing/AuthorityVideos";
+import { SocialProof } from "@/presentation/screens/landing/SocialProof";
+import { FinalCTA } from "@/presentation/screens/landing/FinalCTA";
 import type { ScreenComponentProps } from "@/presentation/screens/screen-registry";
 
-// copy: docs/superpowers/specs/2026-08-06-landing-page-design.md
+// copy: spec de rediseño v1.0 "Escuda tu Patrimonio" — 9 secciones (§2.1-2.9)
 export function LandingScreen({ onChoice }: ScreenComponentProps) {
   const setUtmCampaign = useFormStore((s) => s.setUtmCampaign);
 
@@ -22,27 +24,35 @@ export function LandingScreen({ onChoice }: ScreenComponentProps) {
     setUtmCampaign(params.get("utm_campaign"));
   }, [setUtmCampaign]);
 
+  const handleContinue = () => onChoice("CONTINUE");
+
   return (
     <LandingWrapper>
-      <Hero />
+      <Hero onContinue={handleContinue} />
       <LandingSection>
+        <AuthorityBar />
+      </LandingSection>
+      <LandingSection className="bg-bg-elevated">
         <Problem />
       </LandingSection>
       <LandingSection>
         <Solution />
       </LandingSection>
+      <LandingSection className="bg-bg-elevated">
+        <InstitutionalReframe />
+      </LandingSection>
       <LandingSection>
         <Process />
       </LandingSection>
-      <LandingSection>
-        <Testimonials />
+      <LandingSection className="bg-trust-dark">
+        <AuthorityVideos />
       </LandingSection>
-      <LandingSection>
-        <Credentials />
+      <LandingSection className="bg-bg-elevated">
+        <SocialProof />
       </LandingSection>
-      <div className="px-6 pb-10 pt-4">
-        <CTAButton label="Quiero verificar si califico →" onClick={() => onChoice("CONTINUE")} />
-      </div>
+      <LandingSection className="bg-trust-dark">
+        <FinalCTA onContinue={handleContinue} />
+      </LandingSection>
     </LandingWrapper>
   );
 }
