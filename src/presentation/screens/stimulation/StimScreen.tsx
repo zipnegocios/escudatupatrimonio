@@ -43,7 +43,7 @@ export function StimScreen({
   }, [minDurationMs]);
 
   return (
-    <div className="relative w-full h-full bg-bg-primary overflow-hidden" onClick={handleTap}>
+    <div className="relative w-full h-full bg-trust-dark overflow-hidden" onClick={handleTap}>
       {sceneSetup ? (
         <WebGLCanvas sceneSetup={sceneSetup} />
       ) : (
@@ -59,17 +59,27 @@ export function StimScreen({
       )}
 
       <div className="absolute inset-0 flex flex-col items-center justify-end pb-16 px-8">
-        <p ref={actionRef} className="text-center type-label text-text-secondary mb-3 opacity-0">
+        <p
+          ref={actionRef}
+          className="text-center type-label mb-3 opacity-0"
+          style={{ color: "var(--text-ondark-secondary)" }}
+        >
           {actionText}
         </p>
-        <p ref={factRef} className="text-center type-body max-w-xs opacity-0">
+        <p
+          ref={factRef}
+          className="text-center type-body max-w-xs opacity-0"
+          style={{ color: "var(--text-ondark-secondary)" }}
+        >
           {fact}
         </p>
-        <div className="w-full max-w-xs mt-8 h-0.5 bg-bg-surface rounded-full overflow-hidden">
+        <div className="w-full max-w-xs mt-8 h-0.5 bg-trust-elevated rounded-full overflow-hidden">
           <div ref={barRef} className="h-full bg-gold-primary rounded-full" style={{ width: "0%" }} />
         </div>
         {tapAdvanceAfterMs !== undefined && (
-          <p className="mt-4 type-caption opacity-50">Toca para continuar</p>
+          <p className="mt-4 type-caption opacity-50" style={{ color: "var(--text-ondark-muted)" }}>
+            Toca para continuar
+          </p>
         )}
       </div>
     </div>
