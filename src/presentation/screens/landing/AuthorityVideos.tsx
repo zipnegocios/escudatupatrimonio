@@ -56,9 +56,18 @@ function Reel({ src, poster, index }: ReelProps) {
   return (
     <div
       ref={containerRef}
-      className="relative w-full aspect-[9/16] rounded-[28px] overflow-hidden border shadow-[0_20px_50px_-15px_rgba(0,0,0,0.6)] cursor-pointer"
+      role="button"
+      tabIndex={0}
+      aria-label={playing ? "Pausar video" : "Reproducir video"}
+      className="relative w-full aspect-[9/16] rounded-[28px] overflow-hidden border shadow-[0_20px_50px_-15px_rgba(0,0,0,0.6)] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus"
       style={{ borderColor: "var(--border-ondark)", background: "var(--bg-trust-elevated)" }}
       onClick={toggle}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          toggle();
+        }
+      }}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={poster} alt="" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover" />
