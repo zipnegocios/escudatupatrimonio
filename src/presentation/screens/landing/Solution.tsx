@@ -18,12 +18,19 @@ export function Solution() {
   return (
     <div className="flex flex-col gap-4">
       <p className="type-eyebrow">Cómo te protege este programa</p>
-      {PILARES.map((p) => (
-        <div key={p.title} className="p-5 rounded-2xl bg-bg-elevated border border-border-card">
-          <p className="type-label mb-1">{p.title}</p>
-          <p className="type-body">{p.text}</p>
-        </div>
-      ))}
+      <div className="flex flex-col gap-4 lg:grid lg:grid-cols-3 lg:gap-6">
+        {PILARES.map((p, i) => (
+          <div
+            key={p.title}
+            className={`p-5 rounded-2xl bg-bg-elevated border border-border-card ${
+              i === 0 ? "lg:col-span-2 lg:row-span-2 lg:p-8" : ""
+            }`}
+          >
+            <p className="type-label mb-1">{p.title}</p>
+            <p className="type-body">{p.text}</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
