@@ -43,7 +43,7 @@ export function StimScreen({
   }, [minDurationMs]);
 
   return (
-    <div className="relative w-full h-full bg-trust-dark overflow-hidden" onClick={handleTap}>
+    <div className="relative w-full h-full bg-bg-trust-dark overflow-hidden" onClick={handleTap}>
       {sceneSetup ? (
         <WebGLCanvas sceneSetup={sceneSetup} />
       ) : (
@@ -73,7 +73,7 @@ export function StimScreen({
         >
           {fact}
         </p>
-        <div className="w-full max-w-xs mt-8 h-0.5 bg-trust-elevated rounded-full overflow-hidden">
+        <div className="w-full max-w-xs mt-8 h-0.5 bg-bg-trust-elevated rounded-full overflow-hidden">
           <div ref={barRef} className="h-full bg-gold-primary rounded-full" style={{ width: "0%" }} />
         </div>
         {tapAdvanceAfterMs !== undefined && (

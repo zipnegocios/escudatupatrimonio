@@ -44,13 +44,13 @@ export function LandingScreen({ onChoice }: ScreenComponentProps) {
       <LandingSection>
         <Process />
       </LandingSection>
-      <LandingSection className="bg-trust-dark">
+      <LandingSection className="bg-bg-trust-dark">
         <AuthorityVideos />
       </LandingSection>
       <LandingSection className="bg-bg-elevated">
         <SocialProof />
       </LandingSection>
-      <LandingSection className="bg-trust-dark">
+      <LandingSection className="bg-bg-trust-dark">
         <FinalCTA onContinue={handleContinue} />
       </LandingSection>
     </LandingWrapper>

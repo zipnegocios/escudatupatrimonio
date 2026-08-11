@@ -14,7 +14,7 @@ export function AuthorityVideos() {
           <video
             key={src}
             src={src}
-            className="w-full aspect-[9/16] rounded-2xl object-cover bg-trust-elevated"
+            className="w-full aspect-[9/16] rounded-2xl object-cover bg-bg-trust-elevated"
             controls
             muted
             autoPlay

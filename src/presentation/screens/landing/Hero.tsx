@@ -18,9 +18,9 @@ export function Hero({ onContinue }: HeroProps) {
   }, []);
 
   return (
-    <div ref={ref} className="min-h-dvh flex flex-col justify-center px-6 gap-4 bg-trust-dark">
+    <div ref={ref} className="min-h-dvh flex flex-col justify-center px-6 gap-4 bg-bg-trust-dark">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={BRAND_LOGO_URL} alt="Escuda tu Patrimonio" className="h-14 w-auto mb-2" />
+      <img src={BRAND_LOGO_URL} alt="Escuda tu Patrimonio" className="h-14 w-auto self-start mb-2" />
       <p className="type-eyebrow" style={{ color: "var(--gold-light)" }}>
         Evaluación gratuita · 4 minutos
       </p>
