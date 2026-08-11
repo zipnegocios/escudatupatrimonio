@@ -1,7 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { useFormStore } from "@/presentation/state/form-store";
 import { SCREEN_COMPONENTS } from "@/presentation/screens/screen-registry";
+import { BackButton } from "@/presentation/components/BackButton";
+import { ConfirmExitModal } from "@/presentation/components/ConfirmExitModal";
 
 /**
  * Shell del wizard: una sola ruta cliente que renderiza los 41 screens según
@@ -9,16 +12,37 @@ import { SCREEN_COMPONENTS } from "@/presentation/screens/screen-registry";
  * pantalla puede pedir avanzar — SmartFormApp conecta eso a
  * store.navigate(choiceId), que a su vez llama a getNextScreen. Ninguna
  * pantalla decide su propio ruteo.
+ *
+ * El botón de retroceso vive acá (no en cada screen) para no tocar las 41
+ * pantallas una por una. Regla de confirmación: si el paso anterior en
+ * `history` es LANDING, ir hacia atrás significa salir por completo de la
+ * evaluación — ahí se pide confirmación. Si el paso anterior es cualquier
+ * otra pantalla del wizard, es navegación normal entre preguntas y no la
+ * necesita.
  */
 export function SmartFormApp() {
   const currentScreen = useFormStore((s) => s.currentScreen);
   const vars = useFormStore((s) => s.vars);
+  const history = useFormStore((s) => s.history);
   const navigate = useFormStore((s) => s.navigate);
+  const goBack = useFormStore((s) => s.goBack);
+  const [confirmingExit, setConfirmingExit] = useState(false);
 
   const Screen = SCREEN_COMPONENTS[currentScreen];
+  const previousScreen = history[history.length - 1];
+  const showBackButton = currentScreen !== "LANDING" && history.length > 0;
+
+  const handleBack = () => {
+    if (previousScreen === "LANDING") {
+      setConfirmingExit(true);
+      return;
+    }
+    goBack();
+  };
 
   return (
     <div className="relative w-full h-dvh bg-bg-primary overflow-hidden">
+      {showBackButton && <BackButton onClick={handleBack} />}
       {Screen ? (
         <Screen vars={vars} onChoice={navigate} />
       ) : (
@@ -29,6 +53,15 @@ export function SmartFormApp() {
             {JSON.stringify(vars, null, 2)}
           </pre>
         </div>
+      )}
+      {confirmingExit && (
+        <ConfirmExitModal
+          onConfirm={() => {
+            setConfirmingExit(false);
+            goBack();
+          }}
+          onCancel={() => setConfirmingExit(false)}
+        />
       )}
     </div>
   );

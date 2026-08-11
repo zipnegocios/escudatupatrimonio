@@ -13,6 +13,7 @@ import { Process } from "@/presentation/screens/landing/Process";
 import { AuthorityVideos } from "@/presentation/screens/landing/AuthorityVideos";
 import { SocialProof } from "@/presentation/screens/landing/SocialProof";
 import { FinalCTA } from "@/presentation/screens/landing/FinalCTA";
+import { WhatsAppFloatingButton } from "@/presentation/components/WhatsAppFloatingButton";
 import type { ScreenComponentProps } from "@/presentation/screens/screen-registry";
 
 // copy: spec de rediseño v1.0 "Escuda tu Patrimonio" — 9 secciones (§2.1-2.9)
@@ -38,10 +39,10 @@ export function LandingScreen({ onChoice }: ScreenComponentProps) {
       <LandingSection>
         <Solution />
       </LandingSection>
-      <LandingSection className="bg-bg-elevated">
+      <LandingSection className="bg-bg-elevated" width="narrow">
         <InstitutionalReframe />
       </LandingSection>
-      <LandingSection>
+      <LandingSection width="narrow">
         <Process />
       </LandingSection>
       <LandingSection className="bg-bg-trust-dark">
@@ -50,9 +51,10 @@ export function LandingScreen({ onChoice }: ScreenComponentProps) {
       <LandingSection className="bg-bg-elevated">
         <SocialProof />
       </LandingSection>
-      <LandingSection className="bg-bg-trust-dark">
+      <LandingSection className="bg-bg-trust-dark" width="narrow">
         <FinalCTA onContinue={handleContinue} />
       </LandingSection>
+      <WhatsAppFloatingButton />
     </LandingWrapper>
   );
 }
