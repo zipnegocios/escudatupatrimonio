@@ -23,21 +23,38 @@ export const WHATSAPP_LINK = `https://wa.me/${AGENT_INFO.whatsapp}`;
 
 const ASSET_BASE = "https://pub-beb16d388e93409591cbfdda046059d6.r2.dev/vid";
 
+/**
+ * Logos servidos localmente desde /public/brand, recortados a su bounding
+ * box real (+6% de padding) — los originales en R2 venían en un lienzo
+ * uniforme de 600x300 sin recortar, lo que hacía que cada logo se viera con
+ * una proporción distinta e inconsistente al escalar con `h-N w-auto`
+ * (algunos ocupaban 37% del lienzo, otros 76%). Si se reemplaza cualquiera
+ * de estos archivos, volver a correr el recorte antes de subirlo — un logo
+ * sin recortar rompe la alineación de toda la fila.
+ */
+const BRAND_BASE = "/brand";
+
 /** Logo completo de marca (navy + oro) — usado en el Hero de la landing. */
-export const BRAND_LOGO_URL = `${ASSET_BASE}/escuda-tu-patrimonio-logo.png`;
+export const BRAND_LOGO_URL = `${BRAND_BASE}/escuda-tu-patrimonio-logo.png`;
 /** Ícono cuadrado de marca — usado como favicon (ver metadata.icons en src/app/layout.tsx). */
-export const BRAND_ICON_URL = `${ASSET_BASE}/icono.png`;
+export const BRAND_ICON_URL = `${BRAND_BASE}/icono.png`;
 /** Logo del MIB (Medical Information Bureau) — usado en la Sección 2.5 (reencuadre institucional). */
-export const MIB_LOGO_URL = `${ASSET_BASE}/mib-logo.png`;
+export const MIB_LOGO_URL = `${BRAND_BASE}/mib-logo.png`;
 
 /**
  * Los 2 videos explicativos de Luis (Sección 2.7 — contenido de
  * autoridad, NO son testimonios). Formato vertical, subtítulos quemados
  * en el archivo (no requieren <track> adicional).
  */
-export const AUTHORITY_VIDEOS: readonly string[] = [
-  `${ASSET_BASE}/vid01.mp4`,
-  `${ASSET_BASE}/vid02.mp4`,
+export interface AuthorityVideo {
+  src: string;
+  /** Frame estático servido localmente — se ve de inmediato mientras el mp4 (pesado, servido desde R2) termina de cargar en redes móviles lentas. */
+  poster: string;
+}
+
+export const AUTHORITY_VIDEOS: readonly AuthorityVideo[] = [
+  { src: `${ASSET_BASE}/vid01.mp4`, poster: `${BRAND_BASE}/video-poster-1.jpg` },
+  { src: `${ASSET_BASE}/vid02.mp4`, poster: `${BRAND_BASE}/video-poster-2.jpg` },
 ];
 
 export interface InsurancePartner {
@@ -53,13 +70,13 @@ export interface InsurancePartner {
  * sigue centrado en NLG (ver docs/superpowers/specs/2026-08-06-landing-page-design.md).
  */
 export const INSURANCE_PARTNERS: readonly InsurancePartner[] = [
-  { name: "Ethos", logoUrl: `${ASSET_BASE}/ethos.png` },
-  { name: "Americo", logoUrl: `${ASSET_BASE}/americo.png` },
-  { name: "Mutual of Omaha", logoUrl: `${ASSET_BASE}/mutual.png` },
-  { name: "National Life Group", logoUrl: `${ASSET_BASE}/nlf.png` },
-  { name: "F&G (Annuities & Life)", logoUrl: `${ASSET_BASE}/FyG.png` },
-  { name: "Corebridge Financial", logoUrl: `${ASSET_BASE}/corebridge.png` },
-  { name: "Transamerica", logoUrl: `${ASSET_BASE}/transamerica.png` },
-  { name: "Foresters Financial", logoUrl: `${ASSET_BASE}/forsterst.png` },
-  { name: "Assure for Life", logoUrl: `${ASSET_BASE}/assure.png` },
+  { name: "Ethos", logoUrl: `${BRAND_BASE}/ethos.png` },
+  { name: "Americo", logoUrl: `${BRAND_BASE}/americo.png` },
+  { name: "Mutual of Omaha", logoUrl: `${BRAND_BASE}/mutual.png` },
+  { name: "National Life Group", logoUrl: `${BRAND_BASE}/nlf.png` },
+  { name: "F&G (Annuities & Life)", logoUrl: `${BRAND_BASE}/FyG.png` },
+  { name: "Corebridge Financial", logoUrl: `${BRAND_BASE}/corebridge.png` },
+  { name: "Transamerica", logoUrl: `${BRAND_BASE}/transamerica.png` },
+  { name: "Foresters Financial", logoUrl: `${BRAND_BASE}/forsterst.png` },
+  { name: "Assure for Life", logoUrl: `${BRAND_BASE}/assure.png` },
 ];

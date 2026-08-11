@@ -96,3 +96,34 @@ export function IconShield() {
     </Base>
   );
 }
+
+/** Volatilidad de mercado — usada en Problem (§2.3, dolor #2). */
+export function IconChart() {
+  return (
+    <Base>
+      <path d="M3 17l5-6 4 3 5-7 4 5" />
+      <path d="M3 21h18" />
+    </Base>
+  );
+}
+
+/** Crecimiento sostenido, sin caídas — usada en Solution (§2.4, pilar "Ahorro"). */
+export function IconGrowth() {
+  return (
+    <Base>
+      <path d="M3 19l6-7 4 3 7-9" />
+      <path d="M14 6h6v6" />
+    </Base>
+  );
+}
+
+/** Reloj de aprobación rápida — reutiliza IconClock a otro contexto (Solution, pilar "Protección"). */
+export function IconUmbrella() {
+  return (
+    <Base>
+      <path d="M3 12a9 9 0 0118 0H3z" />
+      <path d="M12 12v7a2 2 0 01-4 0" />
+      <path d="M12 3v2" />
+    </Base>
+  );
+}

@@ -6,6 +6,14 @@ import gsap from "gsap";
 interface LandingSectionProps {
   children: ReactNode;
   className?: string;
+  /**
+   * Ancho máximo del contenido interno. "default" (1120px) sirve para
+   * texto/grids de 3 columnas; "narrow" (720px) para bloques centrados de
+   * lectura (InstitutionalReframe). Ninguna sección debe quedar sin
+   * contenedor — es la causa raíz del "se ve roto en desktop": sin esto,
+   * el contenido se estira borde a borde en pantallas anchas.
+   */
+  width?: "default" | "narrow";
 }
 
 /**
@@ -14,7 +22,7 @@ interface LandingSectionProps {
  * la sección entra en el viewport, vía IntersectionObserver. Distinto de
  * ScreenWrapper/enterScreen (que animan al montar, no al hacer scroll).
  */
-export function LandingSection({ children, className = "" }: LandingSectionProps) {
+export function LandingSection({ children, className = "", width = "default" }: LandingSectionProps) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -35,8 +43,10 @@ export function LandingSection({ children, className = "" }: LandingSectionProps
   }, []);
 
   return (
-    <div ref={ref} className={`px-6 py-12 ${className}`}>
-      {children}
+    <div ref={ref} className={`px-6 py-12 md:py-16 lg:py-20 ${className}`}>
+      <div className={`mx-auto w-full ${width === "narrow" ? "max-w-[640px]" : "max-w-[1120px]"}`}>
+        {children}
+      </div>
     </div>
   );
 }

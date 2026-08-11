@@ -1,4 +1,5 @@
 import { MIB_LOGO_URL } from "@/presentation/constants";
+import { IconDocument } from "@/presentation/components/icons";
 
 /**
  * Sección 2.5 — Reencuadre institucional. Copy ORIGINAL (no viene verbatim
@@ -10,6 +11,9 @@ import { MIB_LOGO_URL } from "@/presentation/constants";
 export function InstitutionalReframe() {
   return (
     <div className="flex flex-col items-center gap-4 text-center">
+      <div className="w-12 h-12 rounded-xl flex items-center justify-center [&_svg]:w-[55%] [&_svg]:h-[55%]" style={{ background: "var(--trust-bg)", color: "var(--trust-blue)" }}>
+        <IconDocument />
+      </div>
       <p className="type-eyebrow">Cómo se evalúa tu perfil</p>
       <h2 className="type-title">Tú aplicas. Ellos deciden.</h2>
       <p className="type-body max-w-md">
