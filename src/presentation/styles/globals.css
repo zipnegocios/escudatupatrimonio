@@ -6,35 +6,48 @@
  * confirmaciones positivas). Ver mvp_arbol_decisiones_smart_form.md.
  */
 :root {
-  --bg-deep: #080f1e;
-  --bg-primary: #0b1628;
-  --bg-surface: #152340;
-  --bg-elevated: #1e3355;
-  --bg-input: #0e1d35;
-  --bg-overlay: rgba(8, 15, 30, 0.85);
+  /* Fondos — tema claro por defecto en las 41 pantallas del wizard + cuerpo de la landing */
+  --bg-deep: #eef2f7;
+  --bg-primary: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-elevated: #f1f5f9;
+  --bg-input: #ffffff;
+  --bg-overlay: rgba(15, 23, 42, 0.78);
 
+  /* Ancla oscura — SOLO Landing Hero, Landing Footer/CTA final, y S1-S5 (WebGL). Valores idénticos al tema oscuro original: ya estaban probados. */
+  --bg-trust-dark: #0b1628;
+  --bg-trust-elevated: #152340;
+  --text-ondark: #f0ece3;
+  --text-ondark-secondary: #a8b5c8;
+  --text-ondark-muted: #6b7a8d;
+  --border-ondark: rgba(255, 255, 255, 0.08);
+
+  /* Oro — SIN cambios de valor: es el oro del logo de marca real (ver BRAND_ICON_URL en constants.ts) */
   --gold-primary: #c9a84c;
   --gold-light: #e8d5a3;
   --gold-dark: #9e7d35;
   --gold-subtle: rgba(201, 168, 76, 0.15);
   --gold-border: rgba(201, 168, 76, 0.35);
   --gold-glow: rgba(201, 168, 76, 0.12);
+  /* Oro usado como TEXTO sobre fondo claro (nunca como fondo): #c9a84c da 2.29:1 sobre blanco (falla WCAG AA). #8a6b1f da 5.0:1. */
+  --gold-text: #8a6b1f;
 
-  --success: #2db87a;
-  --success-bg: rgba(45, 184, 122, 0.1);
-  --trust-blue: #4a9fd4;
-  --trust-bg: rgba(74, 159, 212, 0.1);
-  --caution: #d4a046;
-  --caution-bg: rgba(212, 160, 70, 0.1);
+  /* Recalculados para AA (4.5:1) sobre fondo claro — los valores originales solo habían corrido sobre navy oscuro */
+  --success: #17824f;
+  --success-bg: rgba(23, 130, 79, 0.12);
+  --trust-blue: #2563a8;
+  --trust-bg: rgba(37, 99, 168, 0.1);
+  --caution: #8a5c0c;
+  --caution-bg: rgba(138, 92, 12, 0.12);
 
-  --text-primary: #f0ece3;
-  --text-secondary: #a8b5c8;
-  --text-muted: #6b7a8d;
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
   --text-inverse: #0b1628;
 
-  --border-subtle: rgba(255, 255, 255, 0.06);
-  --border-card: rgba(255, 255, 255, 0.08);
-  --border-focus: rgba(201, 168, 76, 0.5);
+  --border-subtle: rgba(15, 23, 42, 0.06);
+  --border-card: rgba(15, 23, 42, 0.1);
+  --border-focus: rgba(201, 168, 76, 0.6);
 
   --webgl-particle: #c9a84c;
   --webgl-line: rgba(201, 168, 76, 0.3);
@@ -49,12 +62,20 @@
   --color-bg-elevated: var(--bg-elevated);
   --color-bg-input: var(--bg-input);
 
+  --color-bg-trust-dark: var(--bg-trust-dark);
+  --color-bg-trust-elevated: var(--bg-trust-elevated);
+  --color-text-ondark: var(--text-ondark);
+  --color-text-ondark-secondary: var(--text-ondark-secondary);
+  --color-text-ondark-muted: var(--text-ondark-muted);
+  --color-border-ondark: var(--border-ondark);
+
   --color-gold-primary: var(--gold-primary);
   --color-gold-light: var(--gold-light);
   --color-gold-dark: var(--gold-dark);
   --color-gold-subtle: var(--gold-subtle);
   --color-gold-border: var(--gold-border);
   --color-gold-glow: var(--gold-glow);
+  --color-gold-text: var(--gold-text);
 
   --color-success: var(--success);
   --color-success-bg: var(--success-bg);
