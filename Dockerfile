@@ -12,6 +12,16 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
+# Build-arg opcional, NO runtime env var: Next.js evalúa NEXT_PUBLIC_* en
+# este paso (RUN npm run build), no cuando el contenedor final arranca, así
+# que una variable de entorno seteada en EasyPanel para el servicio en
+# runtime NO llega hasta acá — tiene que pasarse como build-arg del build
+# de Docker. Si el panel usado no soporta build-args, esta variable queda
+# vacía y TestimonialCard bloquea los testimonios placeholder por defecto
+# (comportamiento seguro — ver src/presentation/components/TestimonialCard.tsx).
+# Nunca setear a "preview" en el build que sirve el dominio real de producción.
+ARG NEXT_PUBLIC_DEPLOY_ENV
+ENV NEXT_PUBLIC_DEPLOY_ENV=$NEXT_PUBLIC_DEPLOY_ENV
 RUN npm run build
 
 # ---- runner: imagen final mínima, solo lo necesario para servir ----
