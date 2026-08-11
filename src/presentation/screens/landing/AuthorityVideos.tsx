@@ -9,9 +9,14 @@ interface ReelProps extends AuthorityVideo {
 
 /**
  * "Reel" con marco tipo dispositivo móvil, overlay de gradiente para
- * legibilidad del chip de nombre, y control de play/pause propio (en vez
- * de los controles nativos del navegador, inconsistentes entre
- * plataformas y visualmente pobres sobre un fondo oscuro editorial).
+ * legibilidad del chip de nombre.
+ *
+ * Dos estados de reproducción, no solo play/pause:
+ * - `!activated`: preview en loop, muted y automático (autoplay de fondo,
+ *   sin sonido) con un ícono de play grande y centrado como affordance.
+ * - `activated`: el usuario tocó el ícono — el video reinicia desde el
+ *   segundo 0 y reproduce con audio. A partir de ahí, tocar de nuevo hace
+ *   play/pause normal (sin volver a reiniciar ni volver a mutear).
  *
  * El <video> se monta recién cuando la tarjeta entra en el viewport
  * (mismo patrón de IntersectionObserver que LandingSection) — evita gastar
@@ -22,6 +27,7 @@ interface ReelProps extends AuthorityVideo {
 function Reel({ src, poster, index }: ReelProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [activated, setActivated] = useState(false);
   const [playing, setPlaying] = useState(true);
   const [shouldLoad, setShouldLoad] = useState(false);
 
@@ -41,7 +47,17 @@ function Reel({ src, poster, index }: ReelProps) {
     return () => observer.disconnect();
   }, []);
 
-  const toggle = () => {
+  const activate = () => {
+    const el = videoRef.current;
+    if (!el) return;
+    el.currentTime = 0;
+    el.muted = false;
+    el.play();
+    setActivated(true);
+    setPlaying(true);
+  };
+
+  const togglePlayback = () => {
     const el = videoRef.current;
     if (!el) return;
     if (el.paused) {
@@ -53,19 +69,21 @@ function Reel({ src, poster, index }: ReelProps) {
     }
   };
 
+  const handleActivate = () => (activated ? togglePlayback() : activate());
+
   return (
     <div
       ref={containerRef}
       role="button"
       tabIndex={0}
-      aria-label={playing ? "Pausar video" : "Reproducir video"}
+      aria-label={!activated ? "Reproducir video con audio" : playing ? "Pausar video" : "Reproducir video"}
       className="relative w-full aspect-[9/16] rounded-[28px] overflow-hidden border shadow-[0_20px_50px_-15px_rgba(0,0,0,0.6)] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus"
       style={{ borderColor: "var(--border-ondark)", background: "var(--bg-trust-elevated)" }}
-      onClick={toggle}
+      onClick={handleActivate}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          toggle();
+          handleActivate();
         }
       }}
     >
@@ -88,6 +106,20 @@ function Reel({ src, poster, index }: ReelProps) {
         className="absolute inset-0 pointer-events-none"
         style={{ background: "linear-gradient(180deg, rgba(11,22,40,0.15) 0%, rgba(11,22,40,0) 30%, rgba(11,22,40,0.75) 100%)" }}
       />
+
+      {!activated && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div
+            className="w-16 h-16 rounded-full flex items-center justify-center"
+            style={{ background: "rgba(11,22,40,0.55)", backdropFilter: "blur(2px)" }}
+          >
+            <svg width="22" height="22" viewBox="0 0 16 16" fill="white">
+              <path d="M4 2.5v11l9-5.5-9-5.5z" />
+            </svg>
+          </div>
+        </div>
+      )}
+
       <div className="absolute left-3 bottom-3 right-3 flex items-center justify-between">
         <div>
           <p className="type-label" style={{ color: "var(--text-ondark)" }}>
@@ -97,7 +129,7 @@ function Reel({ src, poster, index }: ReelProps) {
             Video {index + 1} · Agente Certificado
           </p>
         </div>
-        {!playing && (
+        {activated && !playing && (
           <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: "rgba(255,255,255,0.15)" }}>
             <svg width="14" height="14" viewBox="0 0 16 16" fill="white">
               <path d="M4 2.5v11l9-5.5-9-5.5z" />
@@ -110,7 +142,7 @@ function Reel({ src, poster, index }: ReelProps) {
 }
 
 // copy: spec de rediseño v1.0 § 2.7 Contenido de autoridad — videos de Luis
-// (NO son testimonios). Formato vertical, autoplay muted, control propio.
+// (NO son testimonios). Preview muted en loop; con audio al activarlo.
 export function AuthorityVideos() {
   return (
     <div className="flex flex-col gap-4">
