@@ -5,11 +5,13 @@ import { TestimonialCard } from "@/presentation/components/TestimonialCard";
  *
  * Los 3 testimonios usan mode="placeholder" a propósito: es contenido
  * ilustrativo para validar el prototipo con Gustavo/Luis/Johanaly, NO
- * testimonios reales. El componente TestimonialCard ya bloquea esto en
- * el environment de producción real (NEXT_PUBLIC_DEPLOY_ENV=production en
- * Vercel — lanza un error si se intenta renderizar así ahí), así que es
- * seguro tenerlos visibles acá y en cualquier deploy de preview mientras
- * el proyecto sigue en fase de validación interna.
+ * testimonios reales. TestimonialCard bloquea esto por defecto en
+ * cualquier build de producción (NODE_ENV=production) y solo lo deja
+ * pasar si el environment tiene explícitamente
+ * NEXT_PUBLIC_DEPLOY_ENV=preview — así que es seguro tenerlos visibles
+ * acá en local y en un deploy de preview/staging correctamente marcado,
+ * pero el dominio real de producción queda protegido aunque nadie
+ * configure nada.
  *
  * QUITAR antes de conectar tráfico pagado real: reemplazar cada
  * `mode="placeholder"` por `mode="verified"` con datos de la campaña

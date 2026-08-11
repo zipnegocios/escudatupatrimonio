@@ -3,7 +3,7 @@ interface TestimonialCardEmptyProps {
 }
 
 interface TestimonialCardPlaceholderProps {
-  /** SOLO para pruebas manuales en local. Nunca invocar con este mode desde un archivo que se despliega — ver el guard de NODE_ENV más abajo. */
+  /** SOLO para pruebas manuales en local o preview interno. Nunca invocar con este mode en un archivo que se despliega a producción real — ver el guard más abajo. */
   mode: "placeholder";
   quote: string;
 }
@@ -46,27 +46,30 @@ const SOURCE_LABEL: Record<string, string> = {
  * - sin `mode`: estado "Próximamente" — el único seguro para producción
  *   mientras no existan testimonios reales.
  * - `mode="placeholder"`: contenido ilustrativo genérico sin nombre/foto
- *   real, para previsualización en desarrollo Y en deploys de staging/
- *   preview (Vercel preview deployments, revisión interna con Gustavo/
- *   Johanaly/Luis). Lanza un error visible si se renderiza con
- *   NEXT_PUBLIC_DEPLOY_ENV=production, para que nunca llegue a un usuario
- *   real por accidente (NAIC MDL-570 / FTC Endorsement Guides: un
- *   testimonio publicitado debe ser de una persona real e identificable).
+ *   real, para previsualización en desarrollo y en deploys de staging/
+ *   preview (revisión interna con Gustavo/Johanaly/Luis). Lanza un error
+ *   visible si se renderiza en el build de producción real, para que
+ *   nunca llegue a un usuario real por accidente (NAIC MDL-570 / FTC
+ *   Endorsement Guides: un testimonio publicitado debe ser de una persona
+ *   real e identificable).
  * - `mode="verified"`: testimonio real, requiere autor, foto y fuente
  *   verificable.
  *
- * OJO con NODE_ENV vs NEXT_PUBLIC_DEPLOY_ENV: `next build` siempre corre
- * con NODE_ENV=production, incluso en un deploy de preview — por eso ese
- * check original bloqueaba también las vistas previas que sí necesitamos
- * mostrar en esta fase. NEXT_PUBLIC_DEPLOY_ENV es una variable de entorno
- * propia (no la fija Next.js) que Gustavo debe configurar SOLO en el
- * environment de producción real del proyecto en Vercel (el dominio que
- * va a recibir tráfico pagado) — nunca en Preview ni Development. Mientras
- * esa variable no esté seteada a "production", los placeholders se
- * renderizan sin problema.
+ * Guard a prueba de olvido: bloquea por defecto en cualquier build con
+ * NODE_ENV=production (que `next build` fija siempre, incluida una
+ * preview) — no depende de que alguien configure una variable nueva a
+ * tiempo. Para ver los placeholders en un deploy de preview/staging
+ * real, hay que setear explícitamente NEXT_PUBLIC_DEPLOY_ENV=preview
+ * SOLO en ese environment — nunca en el dominio de producción con
+ * tráfico pagado. Si esa variable no está seteada (el caso por defecto
+ * en cualquier environment nuevo o mal configurado), el guard bloquea
+ * igual: el fallo seguro es "no se ve el placeholder", nunca "se filtró
+ * un testimonio falso a producción".
  */
 export function TestimonialCard(props: TestimonialCardProps) {
-  if (props.mode === "placeholder" && process.env.NEXT_PUBLIC_DEPLOY_ENV === "production") {
+  const isRealProductionBuild =
+    process.env.NODE_ENV === "production" && process.env.NEXT_PUBLIC_DEPLOY_ENV !== "preview";
+  if (props.mode === "placeholder" && isRealProductionBuild) {
     throw new Error(
       'TestimonialCard: mode="placeholder" no puede renderizarse en producción (es contenido ilustrativo ficticio, no un testimonio real). Usa mode="verified" con datos reales y consentimiento documentado, o quita la prop `mode` para mostrar el estado "Próximamente".'
     );
