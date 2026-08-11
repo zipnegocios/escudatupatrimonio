@@ -1,11 +1,14 @@
 import type { Metadata, Viewport } from "next";
 import "@/presentation/styles/globals.css";
-import { BRAND_NAME } from "@/presentation/constants";
+import { BRAND_NAME, BRAND_ICON_URL } from "@/presentation/constants";
 import { MetaPixelSlot } from "@/presentation/components/MetaPixelSlot";
 
 export const metadata: Metadata = {
   title: BRAND_NAME,
   description: "Evaluación de programas de ahorro y protección",
+  icons: {
+    icon: BRAND_ICON_URL,
+  },
 };
 
 export const viewport: Viewport = {
