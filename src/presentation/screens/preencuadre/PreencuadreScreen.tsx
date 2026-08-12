@@ -5,6 +5,7 @@ import { ScreenWrapper } from "@/presentation/components/ScreenWrapper";
 import { ProgressBar } from "@/presentation/components/ProgressBar";
 import { CTAButton } from "@/presentation/components/CTAButton";
 import { headerIn } from "@/presentation/animations/gsap-micro";
+import { INSURANCE_PARTNERS } from "@/presentation/constants";
 
 interface PreencuadreScreenProps {
   moduleLabel: string;
@@ -12,6 +13,8 @@ interface PreencuadreScreenProps {
   title: string;
   paragraphs: string[];
   link?: { label: string; href: string };
+  /** Fila de logos de las 9 aseguradoras — usado en PRE_1 para reforzar que el programa no está atado a una sola compañía. */
+  logos?: boolean;
   ctaLabel: string;
   onContinue: () => void;
 }
@@ -23,6 +26,7 @@ export function PreencuadreScreen({
   title,
   paragraphs,
   link,
+  logos = false,
   ctaLabel,
   onContinue,
 }: PreencuadreScreenProps) {
@@ -46,6 +50,14 @@ export function PreencuadreScreen({
             {p}
           </p>
         ))}
+        {logos && (
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+            {INSURANCE_PARTNERS.map((partner) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img key={partner.name} src={partner.logoUrl} alt={partner.name} className="h-7 w-auto" loading="lazy" />
+            ))}
+          </div>
+        )}
         {link && (
           <a href={link.href} target="_blank" rel="noopener noreferrer" className="type-caption text-trust">
             {link.label}
