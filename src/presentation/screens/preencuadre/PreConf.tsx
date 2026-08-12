@@ -26,7 +26,7 @@ export function PreConf({ onChoice }: ScreenComponentProps) {
         <h1 className="type-title">He leído y entiendo que:</h1>
         <div className="flex flex-col gap-3">
           <ChecklistItem text="El SSN es requerido por el MIB por ley" />
-          <ChecklistItem text="La cuenta bancaria es requisito de NLG" />
+          <ChecklistItem text="La cuenta bancaria es requisito de la aseguradora asignada" />
           <ChecklistItem text="Puedo verificar la licencia en nipr.com" />
         </div>
       </div>

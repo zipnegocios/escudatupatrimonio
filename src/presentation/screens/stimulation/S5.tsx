@@ -40,7 +40,7 @@ export function S5({ onChoice }: ScreenComponentProps) {
         </p>
         {showFact && (
           <p ref={factRef} className="text-center type-body max-w-xs opacity-0">
-            Tu información está protegida. Solo tu Agente Certificado y National Life Group tendrán acceso a tu perfil.
+            Tu información está protegida. Solo tu Agente Certificado y la aseguradora asignada tendrán acceso a tu perfil.
           </p>
         )}
       </div>

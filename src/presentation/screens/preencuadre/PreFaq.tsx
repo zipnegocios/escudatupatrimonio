@@ -10,11 +10,11 @@ import type { ScreenComponentProps } from "@/presentation/screens/screen-registr
 const FAQ = [
   {
     q: "¿En este formulario me piden el SSN?",
-    a: "No. Tu SSN lo solicitará el Agente Certificado directamente en la llamada, ingresándolo en el sistema seguro de National Life Group. Tú nunca lo escribes en ninguna pantalla de este formulario.",
+    a: "No. Tu SSN lo solicitará el Agente Certificado directamente en la llamada, ingresándolo en el sistema seguro de la aseguradora asignada. Tú nunca lo escribes en ninguna pantalla de este formulario.",
   },
   {
     q: "¿Qué pasa con mis datos si no me apruebo?",
-    a: "Tu información está protegida. Si no cumples con los requisitos del programa, no se realiza ningún cargo ni se comparten tus datos con terceros. Solo el Agente Certificado y National Life Group tienen acceso.",
+    a: "Tu información está protegida. Si no cumples con los requisitos del programa, no se realiza ningún cargo ni se comparten tus datos con terceros. Solo el Agente Certificado y la aseguradora asignada tienen acceso.",
   },
   {
     q: "¿Cómo puedo verificar que Luis es un agente real?",

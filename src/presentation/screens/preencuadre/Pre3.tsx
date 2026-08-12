@@ -11,9 +11,9 @@ export function Pre3({ onChoice }: ScreenComponentProps) {
       eyebrow="Sobre la cuenta bancaria"
       title="Por qué se pedirá tu información bancaria"
       paragraphs={[
-        "National Life Group requiere confirmar que tienes una cuenta bancaria activa en los Estados Unidos.",
+        "La aseguradora asignada requiere confirmar que tienes una cuenta bancaria activa en los Estados Unidos.",
         "Es un requisito de la industria aseguradora: necesitan un canal para procesar el débito mensual de tu programa.",
-        "Solo se necesita el número de cuenta y el número de ruta (routing number). Va directamente a la plataforma segura de National Life Group.",
+        "Solo se necesita el número de cuenta y el número de ruta (routing number). Va directamente a la plataforma segura de la aseguradora.",
       ]}
       ctaLabel="Entendido →"
       onContinue={() => onChoice("CONTINUE")}
