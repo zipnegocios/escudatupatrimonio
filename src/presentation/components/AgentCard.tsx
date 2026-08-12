@@ -16,7 +16,8 @@ export function AgentCard({ size = "medium" }: AgentCardProps) {
       <div className="text-center">
         <p className="type-label">{AGENT_INFO.name}</p>
         <p className="type-caption">Agente Certificado — {AGENT_INFO.company}</p>
-        <p className="type-caption mt-1">Licencia: {AGENT_INFO.license}</p>
+        {/* NPN (National Producer Number): identificador federal del agente, verificable en NIPR.com — no es una licencia emitida por una aseguradora específica. */}
+        <p className="type-caption mt-1">NPN {AGENT_INFO.license} · verificable en NIPR</p>
       </div>
     </div>
   );

@@ -27,8 +27,9 @@ export function Pre4({ onChoice }: ScreenComponentProps) {
         <p className="type-eyebrow">Tu Agente Certificado</p>
         <AgentCard size="large" />
         <p className="type-caption">
-          Puedes verificar su licencia activa en: nipr.com → ingresa su
-          número de licencia
+          Su NPN (número de agente a nivel federal) es verificable en
+          NIPR.com — el registro oficial de agentes de seguros de los
+          Estados Unidos, independiente de cualquier aseguradora.
         </p>
         <a
           href="https://nipr.com"
@@ -46,7 +47,7 @@ export function Pre4({ onChoice }: ScreenComponentProps) {
         >
           Escribirle ahora por WhatsApp →
         </a>
-        <p className="type-caption opacity-50">Licencia: {AGENT_INFO.license}</p>
+        <p className="type-caption opacity-50">NPN {AGENT_INFO.license}</p>
       </div>
       <div className="pb-6">
         <CTAButton label="Continuar →" onClick={() => onChoice("CONTINUE")} />
