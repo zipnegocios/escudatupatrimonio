@@ -8,6 +8,13 @@
       "when": 1787036469311,
       "tag": "0000_warm_toad",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1787056663351,
+      "tag": "0001_illegal_scream",
+      "breakpoints": true
     }
   ]
 }

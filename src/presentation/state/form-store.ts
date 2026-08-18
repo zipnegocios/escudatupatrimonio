@@ -8,6 +8,9 @@ import {
   type QualificationProfile,
 } from "@/core/entities/qualification-profile";
 import { getNextScreen } from "@/core/use-cases/routing-table";
+import { submitLead } from "@/presentation/state/lead-submission";
+
+type SubmissionStatus = "idle" | "submitting" | "submitted" | "error";
 
 function createSessionId(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -29,6 +32,11 @@ interface FormState {
   navigate: (choiceId: string) => void;
   goBack: () => void;
   reset: () => void;
+  submissionStatus: SubmissionStatus;
+  leadId: string | null;
+  // Fire-and-forget: se llama al entrar a S5, nunca bloquea la navegación
+  // del wizard (ver comentario en S5.tsx).
+  submitLeadOnce: () => Promise<void>;
 }
 
 export const useFormStore = create<FormState>()(
@@ -84,7 +92,23 @@ export const useFormStore = create<FormState>()(
           history: [],
           vars: INITIAL_QUALIFICATION_PROFILE,
           utmCampaign: null,
+          submissionStatus: "idle",
+          leadId: null,
         }),
+
+      submissionStatus: "idle",
+      leadId: null,
+      submitLeadOnce: async () => {
+        const { submissionStatus, sessionId, utmCampaign, vars } = get();
+        if (submissionStatus !== "idle") return;
+        set({ submissionStatus: "submitting" });
+        const result = await submitLead({ sessionId, utmCampaign, profile: vars });
+        if (result) {
+          set({ submissionStatus: "submitted", leadId: result.leadId });
+        } else {
+          set({ submissionStatus: "error" });
+        }
+      },
     }),
     {
       name: "escudo-tu-patrimonio-form",

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -19,7 +20,14 @@ export function AdminHeader({ name }: { name: string }) {
 
   return (
     <header className="flex items-center justify-between border-b border-border-card bg-bg-surface px-4 py-3">
-      <span className="text-sm font-medium text-text-primary">{name}</span>
+      <nav className="flex items-center gap-4">
+        <Link href="/admin" className="text-sm font-medium text-text-primary">
+          {name}
+        </Link>
+        <Link href="/admin/leads" className="text-sm text-text-secondary underline">
+          Leads
+        </Link>
+      </nav>
       <button
         type="button"
         onClick={handleLogout}

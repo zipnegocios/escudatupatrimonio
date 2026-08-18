@@ -7,6 +7,7 @@ import { profileBuildScene } from "@/presentation/webgl/scenes/profileBuild";
 import { useStimAdvance } from "@/presentation/screens/stimulation/useStimAdvance";
 import { SCREEN_REGISTRY } from "@/core/use-cases/screen-registry";
 import type { ScreenComponentProps } from "@/presentation/screens/screen-registry";
+import { useFormStore } from "@/presentation/state/form-store";
 
 // copy: mvp_arbol_decisiones_smart_form.md § S5 — Creando perfil
 // No tiene tap-to-skip: "siempre completo — es el cierre del proceso".
@@ -15,7 +16,14 @@ export function S5({ onChoice }: ScreenComponentProps) {
   const actionRef = useRef<HTMLParagraphElement>(null);
   const factRef = useRef<HTMLParagraphElement>(null);
   const [showFact, setShowFact] = useState(false);
+  const submitLeadOnce = useFormStore((s) => s.submitLeadOnce);
   useStimAdvance(meta.minDurationMs!, undefined, () => onChoice("ADVANCE"));
+
+  // Fire-and-forget: si falla la red, el wizard sigue igual — el timer de
+  // useStimAdvance arriba avanza sin depender de esto.
+  useEffect(() => {
+    submitLeadOnce();
+  }, [submitLeadOnce]);
 
   useEffect(() => {
     if (actionRef.current) {

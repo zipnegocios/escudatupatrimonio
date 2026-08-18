@@ -1,5 +1,6 @@
 import "server-only";
 
+import type { LeadRepository } from "@/core/ports/lead-repository";
 import type { PasswordHasher } from "@/core/ports/password-hasher";
 import type { SessionRepository } from "@/core/ports/session-repository";
 import type { SessionTokenService } from "@/core/ports/session-token-service";
@@ -7,6 +8,7 @@ import type { UserRepository } from "@/core/ports/user-repository";
 import { Argon2PasswordHasher } from "@/infrastructure/auth/argon2-password-hasher";
 import { JoseSessionTokenService } from "@/infrastructure/auth/jose-session-token-service";
 import { env } from "@/infrastructure/config/env";
+import { DrizzleLeadRepository } from "@/infrastructure/database/repositories/drizzle-lead-repository";
 import { DrizzleSessionRepository } from "@/infrastructure/database/repositories/drizzle-session-repository";
 import { DrizzleUserRepository } from "@/infrastructure/database/repositories/drizzle-user-repository";
 
@@ -21,3 +23,4 @@ export const passwordHasher: PasswordHasher = new Argon2PasswordHasher();
 export const sessionTokenService: SessionTokenService = new JoseSessionTokenService(
   env.SESSION_SECRET,
 );
+export const leadRepository: LeadRepository = new DrizzleLeadRepository();
