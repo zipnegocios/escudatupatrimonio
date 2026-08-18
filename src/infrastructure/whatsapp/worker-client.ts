@@ -12,7 +12,12 @@ function requireWorkerConfig(): { url: string; secret: string } {
       "El worker de WhatsApp no está configurado (WHATSAPP_WORKER_URL / WHATSAPP_WORKER_SECRET).",
     );
   }
-  return { url: env.WHATSAPP_WORKER_URL, secret: env.WHATSAPP_WORKER_SECRET };
+  // Tolera una barra final en la variable de entorno (WHATSAPP_WORKER_URL=
+  // http://host:4001/) para no depender de que quede escrita sin ella.
+  return {
+    url: env.WHATSAPP_WORKER_URL.replace(/\/+$/, ""),
+    secret: env.WHATSAPP_WORKER_SECRET,
+  };
 }
 
 export async function fetchWorkerStatus(): Promise<WorkerStatusResponse> {
