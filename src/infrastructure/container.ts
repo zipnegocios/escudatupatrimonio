@@ -1,5 +1,6 @@
 import "server-only";
 
+import type { AppointmentRepository } from "@/core/ports/appointment-repository";
 import type { EmailLogRepository } from "@/core/ports/email-log-repository";
 import type { EmailReceivingClient } from "@/core/ports/email-receiving-client";
 import type { EmailSender } from "@/core/ports/email-sender";
@@ -12,6 +13,7 @@ import type { WhatsAppRepository } from "@/core/ports/whatsapp-repository";
 import { Argon2PasswordHasher } from "@/infrastructure/auth/argon2-password-hasher";
 import { JoseSessionTokenService } from "@/infrastructure/auth/jose-session-token-service";
 import { env } from "@/infrastructure/config/env";
+import { DrizzleAppointmentRepository } from "@/infrastructure/database/repositories/drizzle-appointment-repository";
 import { DrizzleEmailLogRepository } from "@/infrastructure/database/repositories/drizzle-email-log-repository";
 import { DrizzleLeadRepository } from "@/infrastructure/database/repositories/drizzle-lead-repository";
 import { DrizzleSessionRepository } from "@/infrastructure/database/repositories/drizzle-session-repository";
@@ -36,3 +38,4 @@ export const whatsAppRepository: WhatsAppRepository = new DrizzleWhatsAppReposit
 export const emailLogRepository: EmailLogRepository = new DrizzleEmailLogRepository();
 export const emailSender: EmailSender = new ResendEmailSender();
 export const emailReceivingClient: EmailReceivingClient = new ResendReceivingClient();
+export const appointmentRepository: AppointmentRepository = new DrizzleAppointmentRepository();

@@ -33,6 +33,9 @@ export function AdminHeader({ name }: { name: string }) {
         <Link href="/admin/email" className="text-sm text-text-secondary underline">
           Emails
         </Link>
+        <Link href="/admin/calendar" className="text-sm text-text-secondary underline">
+          Calendario
+        </Link>
       </nav>
       <button
         type="button"

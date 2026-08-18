@@ -222,6 +222,28 @@ export const emailEvents = pgTable("email_events", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+export const appointments = pgTable("appointments", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  leadId: uuid("lead_id")
+    .notNull()
+    .references(() => leads.id),
+  scheduledStart: timestamp("scheduled_start", { withTimezone: true }).notNull(),
+  scheduledEnd: timestamp("scheduled_end", { withTimezone: true }).notNull(),
+  // IANA, copiada del perfil del lead — para mostrar la cita en la hora
+  // local del prospecto, no solo en UTC.
+  timezone: text("timezone").notNull(),
+  // SCHEDULED|CONFIRMED|RESCHEDULED|CANCELLED|COMPLETED|NO_SHOW
+  status: text("status").notNull().default("SCHEDULED"),
+  // SMART_FORM_INMEDIATO|SMART_FORM_PROGRAMADO|ADMIN_MANUAL
+  source: text("source").notNull().default("ADMIN_MANUAL"),
+  notes: text("notes"),
+  createdByUserId: uuid("created_by_user_id").references(() => users.id),
+  cancelReason: text("cancel_reason"),
+  cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 
@@ -251,3 +273,6 @@ export type NewEmailLogRow = typeof emailLog.$inferInsert;
 
 export type EmailEventRow = typeof emailEvents.$inferSelect;
 export type NewEmailEventRow = typeof emailEvents.$inferInsert;
+
+export type AppointmentRow = typeof appointments.$inferSelect;
+export type NewAppointmentRow = typeof appointments.$inferInsert;
