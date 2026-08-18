@@ -1,5 +1,18 @@
 import { z } from "zod";
 
+// Algunos paneles (EasyPanel incluido) guardan una variable "sin completar"
+// como string vacío en vez de no definirla — `z.string().optional()` por sí
+// solo NO trata "" como ausente, así que una var opcional sin valor real
+// rompía el arranque igual. Este helper normaliza "" a undefined antes de
+// validar, para que "no configurada" se comporte igual venga como falte la
+// key o como key con valor vacío.
+function optionalString() {
+  return z.preprocess(
+    (value) => (value === "" ? undefined : value),
+    z.string().min(1).optional(),
+  );
+}
+
 /**
  * Contrato de variables de entorno de la app. Se valida una sola vez al
  * cargar el módulo: preferimos que el proceso muera al arrancar con un
@@ -16,13 +29,13 @@ const envSchema = z.object({
   // Opcionales: solo hacen falta si el módulo de WhatsApp está activo. La app
   // (y las rutas admin que no dependen de WhatsApp) deben poder arrancar sin
   // ellas — las rutas que sí las necesitan fallan explícitamente si faltan.
-  WHATSAPP_WORKER_URL: z.string().min(1).optional(),
-  WHATSAPP_WORKER_SECRET: z.string().min(1).optional(),
+  WHATSAPP_WORKER_URL: optionalString(),
+  WHATSAPP_WORKER_SECRET: optionalString(),
   // Opcionales: solo hacen falta si el módulo de email está activo.
-  RESEND_API_KEY: z.string().min(1).optional(),
-  RESEND_WEBHOOK_SECRET: z.string().min(1).optional(),
-  EMAIL_FROM_ADDRESS: z.string().min(1).optional(),
-  EMAIL_NOTIFY_TO: z.string().min(1).optional(),
+  RESEND_API_KEY: optionalString(),
+  RESEND_WEBHOOK_SECRET: optionalString(),
+  EMAIL_FROM_ADDRESS: optionalString(),
+  EMAIL_NOTIFY_TO: optionalString(),
 });
 
 export type Env = z.infer<typeof envSchema>;

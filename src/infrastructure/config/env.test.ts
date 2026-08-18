@@ -36,6 +36,13 @@ describe("parseEnv", () => {
     expect(() => parseEnv({ ...valid, SESSION_SECRET: "corto" })).toThrowError(/SESSION_SECRET/);
   });
 
+  it("trata una variable opcional en blanco (string vacío) igual que ausente", () => {
+    // Algunos paneles (EasyPanel incluido) guardan una var "sin completar"
+    // como "" en vez de omitirla — no debe romper el arranque.
+    const result = parseEnv({ ...valid, EMAIL_FROM_ADDRESS: "" });
+    expect(result.EMAIL_FROM_ADDRESS).toBeUndefined();
+  });
+
   it("lanza listando TODAS las variables inválidas de una sola vez", () => {
     let message = "";
     try {
