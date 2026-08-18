@@ -32,5 +32,20 @@ services:
     ports:
       - "3000:3000"
 
+  whatsapp-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.whatsapp-worker
+    container_name: smart-form-iul-whatsapp-worker
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+    depends_on:
+      - postgres
+    # Sin `ports:` a propósito — no se expone al host, solo es alcanzable
+    # desde `web` vía la red interna de compose (WHATSAPP_WORKER_URL=
+    # http://whatsapp-worker:4001).
+
 volumes:
   postgres-data:

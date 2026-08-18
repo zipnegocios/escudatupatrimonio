@@ -1,0 +1,38 @@
+# syntax=docker/dockerfile:1
+#
+# Proceso aparte del `web` principal: Baileys necesita un WebSocket
+# persistente, incompatible con el modelo request/response de Next.js (ver
+# comentario en scripts/whatsapp-worker.ts). Nunca se expone públicamente —
+# solo alcanzable desde la red interna de docker-compose/EasyPanel, protegido
+# además por WHATSAPP_WORKER_SECRET.
+
+# ---- deps: instala dependencias en una capa cacheable ----
+FROM node:20-alpine AS deps
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+
+# ---- builder: compila el worker a un único .cjs con esbuild ----
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+RUN npm run build:whatsapp-worker
+
+# ---- runner: imagen final mínima ----
+FROM node:20-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+
+RUN addgroup --system --gid 1001 nodejs \
+  && adduser --system --uid 1001 nextjs
+
+COPY --from=builder --chown=nextjs:nodejs /app/whatsapp-worker.cjs ./whatsapp-worker.cjs
+
+USER nextjs
+
+# Puerto interno fijo (ver PORT en scripts/whatsapp-worker.ts) — no se
+# publica al host, solo se referencia dentro de la red de compose.
+EXPOSE 4001
+
+CMD ["node", "whatsapp-worker.cjs"]

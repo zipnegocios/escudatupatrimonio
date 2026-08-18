@@ -5,12 +5,14 @@ import type { PasswordHasher } from "@/core/ports/password-hasher";
 import type { SessionRepository } from "@/core/ports/session-repository";
 import type { SessionTokenService } from "@/core/ports/session-token-service";
 import type { UserRepository } from "@/core/ports/user-repository";
+import type { WhatsAppRepository } from "@/core/ports/whatsapp-repository";
 import { Argon2PasswordHasher } from "@/infrastructure/auth/argon2-password-hasher";
 import { JoseSessionTokenService } from "@/infrastructure/auth/jose-session-token-service";
 import { env } from "@/infrastructure/config/env";
 import { DrizzleLeadRepository } from "@/infrastructure/database/repositories/drizzle-lead-repository";
 import { DrizzleSessionRepository } from "@/infrastructure/database/repositories/drizzle-session-repository";
 import { DrizzleUserRepository } from "@/infrastructure/database/repositories/drizzle-user-repository";
+import { DrizzleWhatsAppRepository } from "@/infrastructure/database/repositories/drizzle-whatsapp-repository";
 
 /**
  * Composition root: el único lugar donde el core se ata a los adapters
@@ -24,3 +26,4 @@ export const sessionTokenService: SessionTokenService = new JoseSessionTokenServ
   env.SESSION_SECRET,
 );
 export const leadRepository: LeadRepository = new DrizzleLeadRepository();
+export const whatsAppRepository: WhatsAppRepository = new DrizzleWhatsAppRepository();

@@ -1,4 +1,14 @@
-import { boolean, jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  integer,
+  jsonb,
+  pgTable,
+  primaryKey,
+  text,
+  timestamp,
+  unique,
+  uuid,
+} from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 export const users = pgTable("users", {
@@ -104,6 +114,80 @@ export const leadsRelations = relations(leads, ({ one }) => ({
   }),
 }));
 
+// Hoy siempre hay una sola fila (label "principal"): un número vinculado.
+// Se modela como tabla para poder extender a varios números más adelante
+// sin migrar de cero.
+export const whatsappSessions = pgTable("whatsapp_sessions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  label: text("label").notNull(),
+  phoneNumber: text("phone_number"),
+  // DISCONNECTED | PAIRING_QR | CONNECTED | LOGGED_OUT
+  status: text("status").notNull().default("DISCONNECTED"),
+  connectedAt: timestamp("connected_at", { withTimezone: true }),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/**
+ * Reemplazo de `useMultiFileAuthState` de Baileys (que guarda un archivo por
+ * clave) usando Postgres en vez del filesystem — necesario porque el proceso
+ * de WhatsApp corre en un contenedor aparte que puede reiniciarse sin volumen
+ * persistente. `storageKey` es 'creds' o '{categoria}-{id}' (mismo esquema de
+ * nombres que Baileys usa para sus archivos, ver postgres-auth-state.ts).
+ * `payload` es el JSON ya serializado con BufferJSON.replacer — se guarda
+ * como texto, no jsonb, para poder pasarlo directo a JSON.parse(text,
+ * BufferJSON.reviver) sin una vuelta extra de (de)serialización.
+ */
+export const whatsappAuthState = pgTable(
+  "whatsapp_auth_state",
+  {
+    sessionId: uuid("session_id")
+      .notNull()
+      .references(() => whatsappSessions.id, { onDelete: "cascade" }),
+    storageKey: text("storage_key").notNull(),
+    payload: text("payload").notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [primaryKey({ columns: [table.sessionId, table.storageKey] })],
+);
+
+export const whatsappConversations = pgTable(
+  "whatsapp_conversations",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    sessionId: uuid("session_id")
+      .notNull()
+      .references(() => whatsappSessions.id, { onDelete: "cascade" }),
+    remoteJid: text("remote_jid").notNull(),
+    // Vínculo best-effort por teléfono, nunca automático desde WhatsApp
+    // mismo — QualificationProfile no tiene email pero sí teléfono.
+    leadId: uuid("lead_id").references(() => leads.id),
+    displayName: text("display_name"),
+    lastMessageAt: timestamp("last_message_at", { withTimezone: true }),
+    unreadCount: integer("unread_count").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [unique().on(table.sessionId, table.remoteJid)],
+);
+
+export const whatsappMessages = pgTable(
+  "whatsapp_messages",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    conversationId: uuid("conversation_id")
+      .notNull()
+      .references(() => whatsappConversations.id, { onDelete: "cascade" }),
+    direction: text("direction").notNull(), // INBOUND | OUTBOUND
+    // Idempotencia: Baileys puede reentregar el mismo evento (at-least-once).
+    waMessageId: text("wa_message_id").notNull(),
+    messageType: text("message_type").notNull().default("TEXT"),
+    contentText: text("content_text"),
+    status: text("status").notNull().default("PENDING"),
+    rawPayload: jsonb("raw_payload"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [unique().on(table.conversationId, table.waMessageId)],
+);
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 
@@ -118,3 +202,12 @@ export type NewLead = typeof leads.$inferInsert;
 
 export type QualificationProfileRow = typeof qualificationProfiles.$inferSelect;
 export type NewQualificationProfileRow = typeof qualificationProfiles.$inferInsert;
+
+export type WhatsAppSessionRow = typeof whatsappSessions.$inferSelect;
+export type NewWhatsAppSessionRow = typeof whatsappSessions.$inferInsert;
+
+export type WhatsAppConversationRow = typeof whatsappConversations.$inferSelect;
+export type NewWhatsAppConversationRow = typeof whatsappConversations.$inferInsert;
+
+export type WhatsAppMessageRow = typeof whatsappMessages.$inferSelect;
+export type NewWhatsAppMessageRow = typeof whatsappMessages.$inferInsert;

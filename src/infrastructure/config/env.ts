@@ -13,6 +13,11 @@ const envSchema = z.object({
     .regex(/^postgres(ql)?:\/\//, "debe ser una URL postgres:// o postgresql://"),
   SESSION_SECRET: z.string().min(16, "debe tener al menos 16 caracteres"),
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+  // Opcionales: solo hacen falta si el módulo de WhatsApp está activo. La app
+  // (y las rutas admin que no dependen de WhatsApp) deben poder arrancar sin
+  // ellas — las rutas que sí las necesitan fallan explícitamente si faltan.
+  WHATSAPP_WORKER_URL: z.string().min(1).optional(),
+  WHATSAPP_WORKER_SECRET: z.string().min(1).optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
