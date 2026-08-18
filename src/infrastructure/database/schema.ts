@@ -188,6 +188,40 @@ export const whatsappMessages = pgTable(
   (table) => [unique().on(table.conversationId, table.waMessageId)],
 );
 
+export const emailLog = pgTable("email_log", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  direction: text("direction").notNull(), // OUTBOUND | INBOUND
+  // Único cuando existe, pero nulo hasta que Resend confirma el envío — no
+  // puede ser la PK.
+  resendEmailId: text("resend_email_id").unique(),
+  fromAddress: text("from_address").notNull(),
+  toAddress: text("to_address").notNull(),
+  subject: text("subject"),
+  // QUEUED|SENT|DELIVERED|OPENED|CLICKED|BOUNCED|COMPLAINED|FAILED|RECEIVED
+  status: text("status").notNull().default("QUEUED"),
+  // Vínculo best-effort — QualificationProfile no tiene email, así que nunca
+  // se completa automáticamente, solo si un agente lo asocia a mano.
+  relatedLeadId: uuid("related_lead_id").references(() => leads.id),
+  bodyText: text("body_text"),
+  bodyHtml: text("body_html"),
+  occurredAt: timestamp("occurred_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// Bitácora de auditoría de los webhooks — append-only. email_log.status
+// guarda el estado actual (para listar rápido); esta tabla guarda cada
+// evento crudo tal como llegó, por si hace falta reconstruir el historial.
+export const emailEvents = pgTable("email_events", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  emailLogId: uuid("email_log_id")
+    .notNull()
+    .references(() => emailLog.id, { onDelete: "cascade" }),
+  eventType: text("event_type").notNull(),
+  payload: jsonb("payload").notNull(),
+  occurredAt: timestamp("occurred_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 
@@ -211,3 +245,9 @@ export type NewWhatsAppConversationRow = typeof whatsappConversations.$inferInse
 
 export type WhatsAppMessageRow = typeof whatsappMessages.$inferSelect;
 export type NewWhatsAppMessageRow = typeof whatsappMessages.$inferInsert;
+
+export type EmailLogRow = typeof emailLog.$inferSelect;
+export type NewEmailLogRow = typeof emailLog.$inferInsert;
+
+export type EmailEventRow = typeof emailEvents.$inferSelect;
+export type NewEmailEventRow = typeof emailEvents.$inferInsert;

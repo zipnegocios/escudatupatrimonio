@@ -30,6 +30,9 @@ export function AdminHeader({ name }: { name: string }) {
         <Link href="/admin/whatsapp" className="text-sm text-text-secondary underline">
           WhatsApp
         </Link>
+        <Link href="/admin/email" className="text-sm text-text-secondary underline">
+          Emails
+        </Link>
       </nav>
       <button
         type="button"

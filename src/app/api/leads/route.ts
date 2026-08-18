@@ -1,6 +1,8 @@
 import { z } from "zod";
+import { sendLeadNotificationEmail } from "@/core/use-cases/email/send-lead-notification-email";
 import { submitQualificationProfile } from "@/core/use-cases/leads/submit-qualification-profile";
-import { leadRepository } from "@/infrastructure/container";
+import { env } from "@/infrastructure/config/env";
+import { emailLogRepository, emailSender, leadRepository } from "@/infrastructure/container";
 
 // Mismos literales que QualificationProfile (src/core/entities/qualification-profile.ts).
 // Se validan acá porque este endpoint es público — lo llama el navegador del
@@ -59,6 +61,22 @@ export async function POST(request: Request): Promise<Response> {
       profile: parsed.data.profile,
     },
   );
+
+  // Fire-and-forget: una falla de email nunca debe afectar la respuesta al
+  // Smart Form — el lead ya quedó guardado.
+  if (env.EMAIL_FROM_ADDRESS && env.EMAIL_NOTIFY_TO) {
+    void sendLeadNotificationEmail(
+      { emailSender, emailLogRepository },
+      {
+        fromAddress: env.EMAIL_FROM_ADDRESS,
+        toAddress: env.EMAIL_NOTIFY_TO,
+        nombre: lead.nombre,
+        telefono: lead.telefono,
+        canal: lead.canal,
+        priority: lead.priority,
+      },
+    );
+  }
 
   return Response.json({ ok: true, leadId: lead.id });
 }

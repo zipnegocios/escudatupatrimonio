@@ -18,6 +18,11 @@ const envSchema = z.object({
   // ellas — las rutas que sí las necesitan fallan explícitamente si faltan.
   WHATSAPP_WORKER_URL: z.string().min(1).optional(),
   WHATSAPP_WORKER_SECRET: z.string().min(1).optional(),
+  // Opcionales: solo hacen falta si el módulo de email está activo.
+  RESEND_API_KEY: z.string().min(1).optional(),
+  RESEND_WEBHOOK_SECRET: z.string().min(1).optional(),
+  EMAIL_FROM_ADDRESS: z.string().min(1).optional(),
+  EMAIL_NOTIFY_TO: z.string().min(1).optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
