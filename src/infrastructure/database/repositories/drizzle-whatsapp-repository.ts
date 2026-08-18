@@ -50,7 +50,12 @@ export class DrizzleWhatsAppRepository implements WhatsAppRepository {
         sessionId: input.sessionId,
         remoteJid: input.remoteJid,
         displayName: input.displayName,
+        leadId: input.leadId,
+        kind: input.kind,
       })
+      // A propósito NO se pisan leadId/kind en el conflicto: si un agente ya
+      // clasificó esta conversación a mano, un mensaje nuevo no debe
+      // reclasificarla — ver comentario en el puerto.
       .onConflictDoUpdate({
         target: [whatsappConversations.sessionId, whatsappConversations.remoteJid],
         set: {
@@ -121,5 +126,18 @@ export class DrizzleWhatsAppRepository implements WhatsAppRepository {
       .update(whatsappConversations)
       .set({ unreadCount: 0 })
       .where(eq(whatsappConversations.id, conversationId));
+  }
+
+  async updateConversationClassification(
+    id: string,
+    kind: string,
+    leadId: string | null,
+  ): Promise<WhatsAppConversationRow | null> {
+    const [row] = await db
+      .update(whatsappConversations)
+      .set({ kind, leadId })
+      .where(eq(whatsappConversations.id, id))
+      .returning();
+    return row ?? null;
   }
 }

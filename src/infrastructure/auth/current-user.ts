@@ -21,16 +21,19 @@ import type { User } from "@/infrastructure/database/schema";
  * component anidado pueden llamar a currentUser() sin pegarle N veces a
  * Postgres en el mismo request.
  */
-export const currentUser = cache(async (): Promise<User | null> => {
+// Igual que currentUser(), pero también expone el jti — hace falta para
+// poder revocar las demás sesiones del usuario sin cerrar la actual (ver
+// change-password.ts).
+export const currentSession = cache(async (): Promise<{ user: User; jti: string } | null> => {
   const token = (await cookies()).get(SESSION_COOKIE_NAME)?.value;
   if (token === undefined) {
     return null;
   }
 
-  const verified = await verifySession(
-    { sessionRepository, sessionTokenService, userRepository },
-    token,
-  );
+  return verifySession({ sessionRepository, sessionTokenService, userRepository }, token);
+});
 
-  return verified?.user ?? null;
+export const currentUser = cache(async (): Promise<User | null> => {
+  const session = await currentSession();
+  return session?.user ?? null;
 });

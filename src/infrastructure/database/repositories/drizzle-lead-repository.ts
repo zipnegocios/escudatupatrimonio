@@ -4,9 +4,16 @@ import type {
   LeadRepository,
   LeadWithProfile,
   SaveLeadInput,
+  UpdateLeadFieldsInput,
+  UpdateQualificationProfileInput,
 } from "@/core/ports/lead-repository";
 import { db } from "@/infrastructure/database/db";
-import { leads, qualificationProfiles, type Lead } from "@/infrastructure/database/schema";
+import {
+  leads,
+  qualificationProfiles,
+  type Lead,
+  type QualificationProfileRow,
+} from "@/infrastructure/database/schema";
 
 export class DrizzleLeadRepository implements LeadRepository {
   async save(input: SaveLeadInput): Promise<Lead> {
@@ -112,5 +119,33 @@ export class DrizzleLeadRepository implements LeadRepository {
 
   async updateStatus(id: string, status: string): Promise<void> {
     await db.update(leads).set({ status, updatedAt: new Date() }).where(eq(leads.id, id));
+  }
+
+  async updateLeadFields(id: string, input: UpdateLeadFieldsInput): Promise<Lead> {
+    const [row] = await db
+      .update(leads)
+      .set({
+        nombre: input.nombre,
+        telefono: input.telefono,
+        canal: input.canal,
+        priority: input.priority,
+        status: input.status,
+        updatedAt: new Date(),
+      })
+      .where(eq(leads.id, id))
+      .returning();
+    return row;
+  }
+
+  async updateQualificationProfile(
+    leadId: string,
+    input: UpdateQualificationProfileInput,
+  ): Promise<QualificationProfileRow> {
+    const [row] = await db
+      .update(qualificationProfiles)
+      .set(input)
+      .where(eq(qualificationProfiles.leadId, leadId))
+      .returning();
+    return row;
   }
 }

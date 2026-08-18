@@ -161,6 +161,11 @@ export const whatsappConversations = pgTable(
     // Vínculo best-effort por teléfono, nunca automático desde WhatsApp
     // mismo — QualificationProfile no tiene email pero sí teléfono.
     leadId: uuid("lead_id").references(() => leads.id),
+    // LEAD (matcheada por teléfono) | DIRECT_CLIENT (cliente que escribe
+    // directo, marcado a mano) | IGNORED (no es un cliente) | UNCLASSIFIED
+    // (recién llegada, sin clasificar). Se calcula una vez al crear la
+    // conversación y después solo cambia si un agente la reclasifica a mano.
+    kind: text("kind").notNull().default("UNCLASSIFIED"),
     displayName: text("display_name"),
     lastMessageAt: timestamp("last_message_at", { withTimezone: true }),
     unreadCount: integer("unread_count").notNull().default(0),

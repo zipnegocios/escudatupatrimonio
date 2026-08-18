@@ -10,6 +10,11 @@ export interface UpsertConversationInput {
   sessionId: string;
   remoteJid: string;
   displayName: string | null;
+  // Solo se aplican al CREAR la conversación (ver DrizzleWhatsAppRepository)
+  // — un mensaje nuevo en una conversación ya clasificada por un agente no
+  // debe pisarle la clasificación.
+  leadId: string | null;
+  kind: string;
 }
 
 export interface SaveMessageInput {
@@ -33,4 +38,11 @@ export interface WhatsAppRepository {
   listConversations(sessionId: string): Promise<WhatsAppConversationRow[]>;
   listMessages(conversationId: string): Promise<WhatsAppMessageRow[]>;
   markRead(conversationId: string): Promise<void>;
+  // Reclasificación manual desde el panel — "es un lead" (con leadId
+  // explícito), "atender como cliente directo", o "ignorar".
+  updateConversationClassification(
+    id: string,
+    kind: string,
+    leadId: string | null,
+  ): Promise<WhatsAppConversationRow | null>;
 }

@@ -48,6 +48,13 @@ async function removeData(sessionId: string, storageKey: string): Promise<void> 
     );
 }
 
+// Se usa al re-vincular: sin esto, un logout deja las credenciales viejas
+// (ya inválidas del lado de WhatsApp) guardadas, y el siguiente start()
+// las recarga en vez de arrancar un pairing nuevo — nunca aparece un QR.
+export async function clearAuthState(sessionId: string): Promise<void> {
+  await db.delete(whatsappAuthState).where(eq(whatsappAuthState.sessionId, sessionId));
+}
+
 export async function loadPostgresAuthState(
   sessionId: string,
 ): Promise<{ state: AuthenticationState; saveCreds: () => Promise<void> }> {

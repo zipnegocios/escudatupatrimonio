@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { leadRepository } from "@/infrastructure/container";
+import { LeadContactForm } from "@/presentation/admin/leads/LeadContactForm";
+import { LeadProfileForm } from "@/presentation/admin/leads/LeadProfileForm";
 
 export default async function AdminLeadDetailPage({
   params,
@@ -28,25 +30,56 @@ export default async function AdminLeadDetailPage({
         {lead.telefono ?? "sin teléfono"} · {lead.canal ?? "sin canal"} · estado {lead.status}
       </p>
 
-      {profile && (
-        <div className="mt-6 rounded-xl border border-border-card bg-bg-surface p-4">
-          <h2 className="text-sm font-semibold text-text-primary">Perfil de calificación</h2>
-          {profile.tags.length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-2">
-              {profile.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="rounded-full bg-bg-primary px-2 py-1 text-xs text-text-secondary"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
-          <pre className="mt-4 max-h-96 overflow-auto rounded-lg bg-bg-primary p-4 text-xs text-text-secondary">
-            {JSON.stringify(profile.rawProfile, null, 2)}
-          </pre>
+      {profile && profile.tags.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {profile.tags.map((tag) => (
+            <span
+              key={tag}
+              className="rounded-full bg-bg-surface px-2 py-1 text-xs text-text-secondary"
+            >
+              {tag}
+            </span>
+          ))}
         </div>
+      )}
+
+      <div className="mt-6">
+        <LeadContactForm
+          leadId={lead.id}
+          lead={{
+            nombre: lead.nombre,
+            telefono: lead.telefono,
+            canal: lead.canal,
+            priority: lead.priority,
+            status: lead.status,
+          }}
+        />
+      </div>
+
+      {profile && (
+        <LeadProfileForm
+          leadId={lead.id}
+          profile={{
+            intencionP: profile.intencionP,
+            intencionS: profile.intencionS,
+            horizonte: profile.horizonte,
+            planRetiro: profile.planRetiro,
+            familiaTipo: profile.familiaTipo,
+            preocFamilia: profile.preocFamilia,
+            cobActual: profile.cobActual,
+            preocSalud: profile.preocSalud,
+            edadRango: profile.edadRango,
+            edadCond: profile.edadCond,
+            salud: profile.salud,
+            saludFlag: profile.saludFlag,
+            estatus: profile.estatus,
+            estatusFlag: profile.estatusFlag,
+            estado: profile.estado,
+            timezone: profile.timezone,
+            referido: profile.referido,
+            ventanaDisp: profile.ventanaDisp,
+          }}
+        />
       )}
     </section>
   );

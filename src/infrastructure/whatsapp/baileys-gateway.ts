@@ -13,7 +13,7 @@ import type {
   WhatsAppSessionStatus,
   WhatsAppStatusHandler,
 } from "@/core/ports/whatsapp-gateway";
-import { loadPostgresAuthState } from "@/infrastructure/whatsapp/postgres-auth-state";
+import { clearAuthState, loadPostgresAuthState } from "@/infrastructure/whatsapp/postgres-auth-state";
 
 const logger = pino({ level: "silent" });
 
@@ -128,8 +128,17 @@ export class BaileysGateway implements WhatsAppGateway {
   }
 
   async logout(): Promise<void> {
-    if (!this.socket) return;
-    await this.socket.logout();
+    // socket.logout() puede lanzar si el socket ya está caído (p.ej. tras un
+    // fallo de red) — igual hay que limpiar el estado guardado para poder
+    // re-vincular, así que el error no debe cortar el flujo acá.
+    try {
+      await this.socket?.logout();
+    } catch {
+      // ignorado a propósito — ver comentario arriba
+    }
+    await clearAuthState(this.sessionId);
+    this.socket = null;
+    this.currentQr = null;
   }
 
   private async setStatus(status: WhatsAppSessionStatus, phoneNumber?: string | null): Promise<void> {

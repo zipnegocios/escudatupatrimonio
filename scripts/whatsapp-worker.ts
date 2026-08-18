@@ -12,6 +12,7 @@ import { receiveWhatsAppMessage } from "@/core/use-cases/whatsapp/receive-whatsa
 import { sendWhatsAppMessage } from "@/core/use-cases/whatsapp/send-whatsapp-message";
 import { env } from "@/infrastructure/config/env";
 import { pool } from "@/infrastructure/database/db";
+import { DrizzleLeadRepository } from "@/infrastructure/database/repositories/drizzle-lead-repository";
 import { DrizzleWhatsAppRepository } from "@/infrastructure/database/repositories/drizzle-whatsapp-repository";
 import { BaileysGateway } from "@/infrastructure/whatsapp/baileys-gateway";
 
@@ -44,6 +45,7 @@ async function main(): Promise<void> {
   const secret = env.WHATSAPP_WORKER_SECRET;
 
   const whatsAppRepository = new DrizzleWhatsAppRepository();
+  const leadRepository = new DrizzleLeadRepository();
   const session = await whatsAppRepository.getOrCreateSession(SESSION_LABEL);
   const gateway = new BaileysGateway(session.id);
 
@@ -55,7 +57,7 @@ async function main(): Promise<void> {
   });
 
   gateway.onMessage(async (message) => {
-    await receiveWhatsAppMessage({ whatsAppRepository }, session.id, message);
+    await receiveWhatsAppMessage({ whatsAppRepository, leadRepository }, session.id, message);
   });
 
   await gateway.start();

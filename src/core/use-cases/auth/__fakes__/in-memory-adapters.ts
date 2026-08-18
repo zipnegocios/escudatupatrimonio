@@ -4,7 +4,11 @@ import type {
   SessionTokenPayload,
   SessionTokenService,
 } from "@/core/ports/session-token-service";
-import type { User, UserRepository } from "@/core/ports/user-repository";
+import type {
+  UpdateUserProfileInput,
+  User,
+  UserRepository,
+} from "@/core/ports/user-repository";
 import type { Session } from "@/infrastructure/database/schema";
 
 export function buildUser(overrides: Partial<User> = {}): User {
@@ -43,6 +47,28 @@ export class InMemoryUserRepository implements UserRepository {
 
   async updateLastLogin(id: string, when: Date): Promise<void> {
     this.lastLoginCalls.push({ id, when });
+  }
+
+  async updateProfile(id: string, input: UpdateUserProfileInput): Promise<User> {
+    const index = this.users.findIndex((user) => user.id === id);
+    if (index === -1) {
+      throw new Error(`usuario ${id} no encontrado`);
+    }
+    const updated: User = {
+      ...this.users[index],
+      username: input.username,
+      email: input.email,
+      displayName: input.displayName,
+      updatedAt: new Date(),
+    };
+    this.users[index] = updated;
+    return updated;
+  }
+
+  async updatePasswordHash(id: string, passwordHash: string): Promise<void> {
+    const index = this.users.findIndex((user) => user.id === id);
+    if (index === -1) return;
+    this.users[index] = { ...this.users[index], passwordHash, updatedAt: new Date() };
   }
 }
 
@@ -83,6 +109,15 @@ export class InMemorySessionRepository implements SessionRepository {
     const existing = this.rows.get(id);
     if (existing !== undefined && existing.revokedAt === null) {
       this.rows.set(id, { ...existing, revokedAt: new Date() });
+    }
+  }
+
+  async revokeAllForUser(userId: string, exceptSessionId?: string): Promise<void> {
+    for (const [id, session] of this.rows) {
+      if (session.userId !== userId || session.revokedAt !== null) continue;
+      if (exceptSessionId !== undefined && id === exceptSessionId) continue;
+      this.revokeCalls.push(id);
+      this.rows.set(id, { ...session, revokedAt: new Date() });
     }
   }
 }

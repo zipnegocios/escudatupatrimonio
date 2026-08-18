@@ -36,6 +36,13 @@
       "when": 1787086810263,
       "tag": "0004_brown_venus",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1787091434446,
+      "tag": "0005_legal_shriek",
+      "breakpoints": true
     }
   ]
 }

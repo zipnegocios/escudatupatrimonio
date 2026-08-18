@@ -1,0 +1,1 @@
+ALTER TABLE "whatsapp_conversations" ADD COLUMN "kind" text DEFAULT 'UNCLASSIFIED' NOT NULL;
