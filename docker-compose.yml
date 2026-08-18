@@ -1,0 +1,36 @@
+# SOLO DESARROLLO LOCAL. En producción (EasyPanel) el Postgres es un servicio
+# externo ya provisionado y la app se despliega desde el Dockerfile a secas:
+# este archivo no se usa allá.
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: smart-form-iul-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: smart-form-iul-web
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # Dentro de la red de compose el host de Postgres es `postgres`, no
+      # `localhost`. Esto pisa el DATABASE_URL de .env, que apunta a localhost
+      # porque está pensado para `npm run dev` en la máquina host.
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+    depends_on:
+      - postgres
+    ports:
+      - "3000:3000"
+
+volumes:
+  postgres-data:
