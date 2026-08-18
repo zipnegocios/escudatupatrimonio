@@ -1,17 +1,22 @@
-import argon2 from "argon2";
+import bcrypt from "bcryptjs";
 import type { PasswordHasher } from "@/core/ports/password-hasher";
+
+// FALLBACK: argon2 requiere compilar un binario nativo (node-gyp + Python),
+// y la imagen node:20-alpine de EasyPanel no trae ese toolchain — el build
+// fallaba en `npm ci`. bcryptjs es JS puro, sin binario nativo, así que evita
+// el problema por completo. Se mantiene el nombre de clase/archivo para no
+// arrastrar el cambio al resto de la app (puerto, tests y composition root
+// quedan iguales).
+const COST_FACTOR = 12;
 
 export class Argon2PasswordHasher implements PasswordHasher {
   async hash(plain: string): Promise<string> {
-    return argon2.hash(plain, { type: argon2.argon2id });
+    return bcrypt.hash(plain, COST_FACTOR);
   }
 
-  // argon2.verify lanza si el hash no tiene un formato que reconozca (fila
-  // corrupta, hash de otro algoritmo). Para el caller eso es simplemente "no
-  // coincide", no un error de programa que deba propagarse.
   async verify(plain: string, hash: string): Promise<boolean> {
     try {
-      return await argon2.verify(hash, plain);
+      return await bcrypt.compare(plain, hash);
     } catch {
       return false;
     }
