@@ -13,7 +13,7 @@ import type {
   WhatsAppSessionStatus,
   WhatsAppStatusHandler,
 } from "@/core/ports/whatsapp-gateway";
-import { usePostgresAuthState } from "@/infrastructure/whatsapp/postgres-auth-state";
+import { loadPostgresAuthState } from "@/infrastructure/whatsapp/postgres-auth-state";
 
 const logger = pino({ level: "silent" });
 
@@ -57,7 +57,7 @@ export class BaileysGateway implements WhatsAppGateway {
   }
 
   async start(): Promise<void> {
-    const { state, saveCreds } = await usePostgresAuthState(this.sessionId);
+    const { state, saveCreds } = await loadPostgresAuthState(this.sessionId);
     const { version } = await fetchLatestBaileysVersion();
 
     const socket = makeWASocket({

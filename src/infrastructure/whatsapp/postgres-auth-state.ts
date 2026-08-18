@@ -48,7 +48,7 @@ async function removeData(sessionId: string, storageKey: string): Promise<void> 
     );
 }
 
-export async function usePostgresAuthState(
+export async function loadPostgresAuthState(
   sessionId: string,
 ): Promise<{ state: AuthenticationState; saveCreds: () => Promise<void> }> {
   const creds = (await readData<AuthenticationCreds>(sessionId, "creds")) ?? initAuthCreds();

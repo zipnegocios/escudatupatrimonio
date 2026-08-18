@@ -47,8 +47,11 @@ export function WhatsAppQrPanel() {
   }, []);
 
   useEffect(() => {
-    poll();
-    const interval = setInterval(poll, POLL_MS);
+    const tick = (): void => {
+      poll();
+    };
+    tick();
+    const interval = setInterval(tick, POLL_MS);
     return () => clearInterval(interval);
   }, [poll]);
 
