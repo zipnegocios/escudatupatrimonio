@@ -22,7 +22,14 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # Nunca setear a "preview" en el build que sirve el dominio real de producción.
 ARG NEXT_PUBLIC_DEPLOY_ENV
 ENV NEXT_PUBLIC_DEPLOY_ENV=$NEXT_PUBLIC_DEPLOY_ENV
+# Valores dummy SOLO para el build: `next build` importa los route handlers
+# para analizarlos, y esos importan src/infrastructure/config/env.ts, que
+# valida process.env al cargarse. No hay Postgres en el build ni estas
+# variables sobreviven a esta etapa — el runner recibe las reales de EasyPanel.
+ENV DATABASE_URL=postgres://build:build@localhost:5432/build
+ENV SESSION_SECRET=build-time-placeholder-secret
 RUN npm run build
+RUN npm run build:migrate
 
 # ---- runner: imagen final mínima, solo lo necesario para servir ----
 FROM node:20-alpine AS runner
@@ -36,6 +43,8 @@ RUN addgroup --system --gid 1001 nodejs \
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/migrate.cjs ./migrate.cjs
+COPY --from=builder --chown=nextjs:nodejs /app/drizzle ./drizzle
 
 USER nextjs
 
@@ -44,4 +53,6 @@ ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+# Las migraciones corren antes de servir: si fallan, `&&` corta y el
+# contenedor muere en vez de arrancar contra un esquema desactualizado.
+CMD ["sh", "-c", "node migrate.cjs && node server.js"]
