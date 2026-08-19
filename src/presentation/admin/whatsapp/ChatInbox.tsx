@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 interface Conversation {
   id: string;
@@ -54,6 +55,9 @@ const TABS: { value: Tab; label: string }[] = [
 ];
 
 export function ChatInbox() {
+  const searchParams = useSearchParams();
+  const startLeadId = searchParams.get("leadId");
+
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [tab, setTab] = useState<Tab>("UNCLASSIFIED");
   const [selected, setSelected] = useState<Conversation | null>(null);
@@ -62,6 +66,12 @@ export function ChatInbox() {
   const [sending, setSending] = useState(false);
   const [asVoiceNote, setAsVoiceNote] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [recording, setRecording] = useState(false);
+  const [newLeadNombre, setNewLeadNombre] = useState("");
+  const [creatingLead, setCreatingLead] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordedChunksRef = useRef<Blob[]>([]);
+  const pendingLeadIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     const loadConversations = async (): Promise<void> => {
@@ -73,6 +83,24 @@ export function ChatInbox() {
     const interval = setInterval(loadConversations, 5000);
     return () => clearInterval(interval);
   }, []);
+
+  // Si venimos desde "Escribir por WhatsApp" en el detalle de un lead
+  // (?leadId=...), esa conversación ya se creó del lado del server — acá
+  // solo hace falta seleccionarla apenas aparezca en la lista.
+  useEffect(() => {
+    if (!startLeadId) return;
+    pendingLeadIdRef.current = startLeadId;
+  }, [startLeadId]);
+
+  useEffect(() => {
+    if (!pendingLeadIdRef.current) return;
+    const match = conversations.find((c) => c.leadId === pendingLeadIdRef.current);
+    if (match) {
+      setSelected(match);
+      setTab(match.kind as Tab);
+      pendingLeadIdRef.current = null;
+    }
+  }, [conversations]);
 
   useEffect(() => {
     if (!selected) return;
@@ -93,17 +121,22 @@ export function ChatInbox() {
     [conversations, tab],
   );
 
-  const classify = async (conversationId: string, kind: string): Promise<void> => {
+  const classify = async (
+    conversationId: string,
+    kind: string,
+    leadIdOverride?: string,
+  ): Promise<void> => {
+    const leadId = kind === "LEAD" ? (leadIdOverride ?? selected?.leadId ?? null) : null;
     await fetch(`/api/admin/whatsapp/conversations/${conversationId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ kind, leadId: kind === "LEAD" ? selected?.leadId : null }),
+      body: JSON.stringify({ kind, leadId }),
     });
     setConversations((prev) =>
-      prev.map((c) => (c.id === conversationId ? { ...c, kind } : c)),
+      prev.map((c) => (c.id === conversationId ? { ...c, kind, leadId } : c)),
     );
     if (selected?.id === conversationId) {
-      setSelected((prev) => (prev ? { ...prev, kind } : prev));
+      setSelected((prev) => (prev ? { ...prev, kind, leadId } : prev));
     }
   };
 
@@ -131,18 +164,60 @@ export function ChatInbox() {
     setSending(false);
   };
 
-  const handleAttach = async (file: File): Promise<void> => {
+  const handleAttach = async (file: File, forceVoiceNote?: boolean): Promise<void> => {
     if (!selected) return;
     setUploading(true);
     const formData = new FormData();
     formData.append("file", file);
     formData.append("remoteJid", selected.remoteJid);
-    formData.append("asVoiceNote", String(asVoiceNote));
+    formData.append("asVoiceNote", String(forceVoiceNote ?? asVoiceNote));
     await fetch(`/api/admin/whatsapp/conversations/${selected.id}/media`, {
       method: "POST",
       body: formData,
     });
     setUploading(false);
+  };
+
+  const handleStartRecording = async (): Promise<void> => {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    // Formato que Chrome/Edge/Firefox saben grabar sin librerías aparte —
+    // el worker no necesita convertirlo, WhatsApp acepta ogg/opus.
+    const recorder = new MediaRecorder(stream, { mimeType: "audio/webm;codecs=opus" });
+    recordedChunksRef.current = [];
+    recorder.ondataavailable = (event) => {
+      if (event.data.size > 0) recordedChunksRef.current.push(event.data);
+    };
+    recorder.onstop = () => {
+      stream.getTracks().forEach((track) => track.stop());
+      const blob = new Blob(recordedChunksRef.current, { type: "audio/webm" });
+      const file = new File([blob], "nota-de-voz.webm", { type: "audio/webm" });
+      void handleAttach(file, true);
+    };
+    mediaRecorderRef.current = recorder;
+    recorder.start();
+    setRecording(true);
+  };
+
+  const handleStopRecording = (): void => {
+    mediaRecorderRef.current?.stop();
+    setRecording(false);
+  };
+
+  const handleCreateLead = async (): Promise<void> => {
+    if (!selected || newLeadNombre.trim().length === 0) return;
+    setCreatingLead(true);
+    const telefono = selected.remoteJid.split("@")[0];
+    const response = await fetch("/api/admin/leads", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nombre: newLeadNombre.trim(), telefono, canal: "WHATSAPP" }),
+    });
+    const data = await response.json();
+    if (data.ok) {
+      await classify(selected.id, "LEAD", data.lead.id);
+      setNewLeadNombre("");
+    }
+    setCreatingLead(false);
   };
 
   return (
@@ -252,6 +327,26 @@ export function ChatInbox() {
                   Borrar conversación
                 </button>
               </div>
+
+              {!selected.leadId && (
+                <div className="flex items-center gap-2 border-b border-border-card px-4 py-2">
+                  <input
+                    type="text"
+                    value={newLeadNombre}
+                    onChange={(e) => setNewLeadNombre(e.target.value)}
+                    placeholder="Nombre para crear perfil de lead…"
+                    className="flex-1 rounded-lg border border-border-card px-2 py-1 text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleCreateLead}
+                    disabled={creatingLead || newLeadNombre.trim().length === 0}
+                    className="rounded border border-border-card px-2 py-1 text-xs text-text-secondary disabled:opacity-60"
+                  >
+                    {creatingLead ? "Creando…" : "Crear perfil de lead"}
+                  </button>
+                </div>
+              )}
               <div className="flex-1 space-y-2 overflow-y-auto p-4">
                 {messages.map((message) => (
                   <div
@@ -268,13 +363,24 @@ export function ChatInbox() {
               </div>
               <div className="flex flex-col gap-2 border-t border-border-card p-3">
                 <div className="flex items-center gap-2 text-xs text-text-secondary">
+                  <button
+                    type="button"
+                    onClick={recording ? handleStopRecording : handleStartRecording}
+                    className={`rounded border px-2 py-1 ${
+                      recording
+                        ? "border-caution text-caution"
+                        : "border-border-card text-text-secondary"
+                    }`}
+                  >
+                    {recording ? "⏹ Detener y enviar nota de voz" : "🎤 Grabar nota de voz"}
+                  </button>
                   <label className="flex items-center gap-1">
                     <input
                       type="checkbox"
                       checked={asVoiceNote}
                       onChange={(e) => setAsVoiceNote(e.target.checked)}
                     />
-                    Enviar audio como nota de voz
+                    Enviar audio adjunto como nota de voz
                   </label>
                   <label className="cursor-pointer rounded border border-border-card px-2 py-1">
                     {uploading ? "Subiendo…" : "Adjuntar imagen/audio/video"}

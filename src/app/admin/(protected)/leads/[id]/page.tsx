@@ -3,6 +3,7 @@ import Link from "next/link";
 import { leadRepository } from "@/infrastructure/container";
 import { LeadContactForm } from "@/presentation/admin/leads/LeadContactForm";
 import { LeadProfileForm } from "@/presentation/admin/leads/LeadProfileForm";
+import { LeadWhatsAppActions } from "@/presentation/admin/leads/LeadWhatsAppActions";
 
 export default async function AdminLeadDetailPage({
   params,
@@ -29,6 +30,8 @@ export default async function AdminLeadDetailPage({
       <p className="mt-1 text-sm text-text-secondary">
         {lead.telefono ?? "sin teléfono"} · {lead.canal ?? "sin canal"} · estado {lead.status}
       </p>
+
+      <LeadWhatsAppActions leadId={lead.id} telefono={lead.telefono} />
 
       {profile && profile.tags.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-2">

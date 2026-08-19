@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { ChatInbox } from "@/presentation/admin/whatsapp/ChatInbox";
 import { WhatsAppQrPanel } from "@/presentation/admin/whatsapp/WhatsAppQrPanel";
 
@@ -11,7 +12,12 @@ export default function AdminWhatsAppPage() {
       <div className="mt-4">
         <WhatsAppQrPanel />
       </div>
-      <ChatInbox />
+      {/* ChatInbox usa useSearchParams (?leadId=) para abrir directo la
+          conversación de un lead — Next exige un límite de Suspense
+          alrededor de cualquier componente que lo use. */}
+      <Suspense fallback={null}>
+        <ChatInbox />
+      </Suspense>
     </section>
   );
 }
