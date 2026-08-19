@@ -65,13 +65,18 @@ export async function receiveWhatsAppMessage(
     }
   }
 
+  // fromMe llega tanto de sendMessage()/sendMedia() (que ya guardó el
+  // mensaje con este mismo waMessageId) como de una respuesta mandada
+  // directo desde el teléfono (que nunca pasó por acá). El unique
+  // constraint (conversationId, waMessageId) + onConflictDoNothing hace que
+  // el primer caso sea un no-op seguro — nunca duplica.
   await deps.whatsAppRepository.saveMessage({
     conversationId: conversation.id,
-    direction: "INBOUND",
+    direction: message.fromMe ? "OUTBOUND" : "INBOUND",
     waMessageId: message.waMessageId,
     messageType: message.messageType,
     contentText: message.contentText,
-    status: "RECEIVED",
+    status: message.fromMe ? "SENT" : "RECEIVED",
     mediaKey,
     mediaMimeType,
   });

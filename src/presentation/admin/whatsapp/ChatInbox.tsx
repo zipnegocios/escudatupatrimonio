@@ -534,6 +534,10 @@ export function ChatInbox() {
                         >
                           <div
                             className={`max-w-[75%] rounded-2xl px-3 py-2 text-sm shadow-sm ${
+                              message.messageType === "AUDIO" || message.messageType === "VOICE_NOTE"
+                                ? "min-w-[250px]"
+                                : ""
+                            } ${
                               message.direction === "OUTBOUND"
                                 ? "rounded-tr-sm bg-wa-bubble-out text-text-primary"
                                 : "rounded-tl-sm bg-wa-bubble-in text-text-primary"

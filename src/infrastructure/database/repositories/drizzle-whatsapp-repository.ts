@@ -1,4 +1,4 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import type {
   SaveMessageInput,
   UpsertConversationInput,
@@ -56,11 +56,14 @@ export class DrizzleWhatsAppRepository implements WhatsAppRepository {
       })
       // A propósito NO se pisan leadId/kind en el conflicto: si un agente ya
       // clasificó esta conversación a mano, un mensaje nuevo no debe
-      // reclasificarla — ver comentario en el puerto.
+      // reclasificarla — ver comentario en el puerto. displayName usa
+      // COALESCE: un mensaje fromMe manda null a propósito (pushName ahí es
+      // el nombre de la propia cuenta, no el del contacto — ver
+      // baileys-gateway.ts) y no debe borrar el nombre real ya guardado.
       .onConflictDoUpdate({
         target: [whatsappConversations.sessionId, whatsappConversations.remoteJid],
         set: {
-          displayName: input.displayName,
+          displayName: sql`coalesce(${input.displayName}, ${whatsappConversations.displayName})`,
         },
       })
       .returning();

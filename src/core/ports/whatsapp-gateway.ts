@@ -15,6 +15,11 @@ export interface IncomingWhatsAppMessage {
   contentText: string | null;
   messageType: string;
   media: IncomingWhatsAppMedia | null;
+  // true cuando el mensaje lo mandó la cuenta vinculada — no solo desde
+  // este panel (sendMessage/sendMedia), también cuando el admin le
+  // responde a alguien directo desde WhatsApp en su teléfono. Baileys
+  // reporta ambos casos por el mismo evento.
+  fromMe: boolean;
 }
 
 export type WhatsAppMessageHandler = (message: IncomingWhatsAppMessage) => Promise<void>;

@@ -139,20 +139,23 @@ export class BaileysGateway implements WhatsAppGateway {
       if (type !== "notify" || !this.messageHandler) return;
 
       for (const message of messages) {
-        // Los mensajes propios (fromMe) también llegan por este evento —
-        // ya se registran al enviarlos desde sendMessage(), no de nuevo acá.
-        if (message.key.fromMe || !message.key.remoteJid) continue;
+        if (!message.key.remoteJid) continue;
+        const fromMe = message.key.fromMe ?? false;
 
         const text = extractText(message.message);
         const media = await this.downloadIncomingMedia(message);
 
         await this.messageHandler({
           remoteJid: message.key.remoteJid,
-          displayName: message.pushName ?? null,
+          // pushName en un mensaje fromMe es el nombre de la propia cuenta,
+          // no el del contacto — pasar eso pisaría el nombre real del
+          // contacto en la conversación.
+          displayName: fromMe ? null : (message.pushName ?? null),
           waMessageId: message.key.id ?? randomUUID(),
           contentText: text,
           messageType: media?.type ?? (text ? "TEXT" : "OTHER"),
           media,
+          fromMe,
         });
       }
     });
