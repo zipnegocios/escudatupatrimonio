@@ -9,6 +9,7 @@ export type { WhatsAppConversationRow, WhatsAppMessageRow, WhatsAppSessionRow };
 export interface UpsertConversationInput {
   sessionId: string;
   remoteJid: string;
+  phoneNumber: string | null;
   displayName: string | null;
   // Solo se aplican al CREAR la conversación (ver DrizzleWhatsAppRepository)
   // — un mensaje nuevo en una conversación ya clasificada por un agente no
@@ -51,4 +52,5 @@ export interface WhatsAppRepository {
   // Borra la conversación y, en cascada (FK), todos sus mensajes.
   deleteConversation(id: string): Promise<void>;
   updateAvatarUrl(id: string, avatarUrl: string | null): Promise<void>;
+  updatePhoneNumber(id: string, phoneNumber: string | null): Promise<void>;
 }

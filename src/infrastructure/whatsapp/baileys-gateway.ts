@@ -4,7 +4,10 @@ import makeWASocket, {
   DisconnectReason,
   downloadMediaMessage,
   fetchLatestBaileysVersion,
+  isLidUser,
+  jidDecode,
   type WAMessage,
+  type WAMessageKey,
   type WASocket,
 } from "@whiskeysockets/baileys";
 import pino from "pino";
@@ -157,12 +160,14 @@ export class BaileysGateway implements WhatsAppGateway {
           continue;
         }
         const fromMe = message.key.fromMe ?? false;
+        const phoneNumber = await this.resolvePhoneNumber(message.key);
 
         const text = extractText(message.message);
         const media = await this.downloadIncomingMedia(message);
 
         await this.messageHandler({
           remoteJid,
+          phoneNumber,
           // pushName en un mensaje fromMe es el nombre de la propia cuenta,
           // no el del contacto — pasar eso pisaría el nombre real del
           // contacto en la conversación.
@@ -175,6 +180,40 @@ export class BaileysGateway implements WhatsAppGateway {
         });
       }
     });
+  }
+
+  // Con @lid, remoteJid es un identificador opaco — el número real viaja
+  // aparte, si WhatsApp lo incluyó en este mensaje (remoteJidAlt), o se
+  // busca en el mapeo LID↔teléfono que Baileys ya mantiene localmente.
+  // Devuelve null si no hay forma de resolverlo (no es un error: un
+  // mensaje sin número resuelto igual se guarda, solo sin ese dato).
+  private async resolvePhoneNumber(key: WAMessageKey): Promise<string | null> {
+    const remoteJid = key.remoteJid;
+    if (!remoteJid || !isLidUser(remoteJid)) {
+      return remoteJid ? (jidDecode(remoteJid)?.user ?? null) : null;
+    }
+    if (key.remoteJidAlt) {
+      return jidDecode(key.remoteJidAlt)?.user ?? null;
+    }
+    return this.resolveFromLidMapping(remoteJid);
+  }
+
+  // Sin una stanza fresca no hay remoteJidAlt — solo se puede consultar el
+  // mapeo que Baileys ya tenga cacheado localmente (nunca lanza: ausencia
+  // de mapeo no es un error, solo "todavía no se sabe").
+  private async resolveFromLidMapping(lidJid: string): Promise<string | null> {
+    if (!this.socket) return null;
+    try {
+      const pn = await this.socket.signalRepository.lidMapping.getPNForLID(lidJid);
+      return pn ? (jidDecode(pn)?.user ?? null) : null;
+    } catch {
+      return null;
+    }
+  }
+
+  async resolvePhoneNumberForJid(jid: string): Promise<string | null> {
+    if (!isLidUser(jid)) return jidDecode(jid)?.user ?? null;
+    return this.resolveFromLidMapping(jid);
   }
 
   // Devuelve null tanto si el mensaje no es de medios como si la descarga

@@ -128,6 +128,14 @@ async function main(): Promise<void> {
           return;
         }
 
+        if (req.method === "GET" && req.url?.startsWith("/internal/resolve-phone")) {
+          const jid = new URL(req.url, "http://internal").searchParams.get("jid");
+          const phoneNumber = jid ? await gateway.resolvePhoneNumberForJid(jid) : null;
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ phoneNumber }));
+          return;
+        }
+
         if (req.method === "POST" && req.url === "/internal/relink") {
           await gateway.logout();
           await gateway.start();

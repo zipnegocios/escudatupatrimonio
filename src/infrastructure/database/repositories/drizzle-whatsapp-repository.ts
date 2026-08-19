@@ -49,6 +49,7 @@ export class DrizzleWhatsAppRepository implements WhatsAppRepository {
       .values({
         sessionId: input.sessionId,
         remoteJid: input.remoteJid,
+        phoneNumber: input.phoneNumber,
         displayName: input.displayName,
         leadId: input.leadId,
         kind: input.kind,
@@ -56,14 +57,17 @@ export class DrizzleWhatsAppRepository implements WhatsAppRepository {
       })
       // A propósito NO se pisan leadId/kind en el conflicto: si un agente ya
       // clasificó esta conversación a mano, un mensaje nuevo no debe
-      // reclasificarla — ver comentario en el puerto. displayName usa
-      // COALESCE: un mensaje fromMe manda null a propósito (pushName ahí es
-      // el nombre de la propia cuenta, no el del contacto — ver
-      // baileys-gateway.ts) y no debe borrar el nombre real ya guardado.
+      // reclasificarla — ver comentario en el puerto. displayName y
+      // phoneNumber usan COALESCE: un mensaje fromMe manda displayName null
+      // a propósito (pushName ahí es el nombre de la propia cuenta, no el
+      // del contacto — ver baileys-gateway.ts), y phoneNumber puede no
+      // resolverse en todos los mensajes de un contacto @lid — ninguno de
+      // los dos debe borrar un valor ya guardado.
       .onConflictDoUpdate({
         target: [whatsappConversations.sessionId, whatsappConversations.remoteJid],
         set: {
           displayName: sql`coalesce(${input.displayName}, ${whatsappConversations.displayName})`,
+          phoneNumber: sql`coalesce(${input.phoneNumber}, ${whatsappConversations.phoneNumber})`,
         },
       })
       .returning();
@@ -153,5 +157,12 @@ export class DrizzleWhatsAppRepository implements WhatsAppRepository {
 
   async updateAvatarUrl(id: string, avatarUrl: string | null): Promise<void> {
     await db.update(whatsappConversations).set({ avatarUrl }).where(eq(whatsappConversations.id, id));
+  }
+
+  async updatePhoneNumber(id: string, phoneNumber: string | null): Promise<void> {
+    await db
+      .update(whatsappConversations)
+      .set({ phoneNumber })
+      .where(eq(whatsappConversations.id, id));
   }
 }

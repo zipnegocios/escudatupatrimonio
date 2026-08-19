@@ -19,12 +19,17 @@ export async function receiveWhatsAppMessage(
 ): Promise<void> {
   // Solo importa en conversaciones nuevas — el adapter nunca pisa
   // leadId/kind de una conversación ya existente (ver
-  // DrizzleWhatsAppRepository.upsertConversation).
-  const leadId = await matchLeadByPhone({ leadRepository: deps.leadRepository }, message.remoteJid);
+  // DrizzleWhatsAppRepository.upsertConversation). Con @lid, remoteJid no
+  // es un teléfono real — hay que usar el número resuelto aparte, si lo hay.
+  const leadId = await matchLeadByPhone(
+    { leadRepository: deps.leadRepository },
+    message.phoneNumber ?? message.remoteJid,
+  );
 
   const conversation = await deps.whatsAppRepository.upsertConversation({
     sessionId,
     remoteJid: message.remoteJid,
+    phoneNumber: message.phoneNumber,
     displayName: message.displayName,
     leadId,
     kind: leadId ? "LEAD" : "UNCLASSIFIED",

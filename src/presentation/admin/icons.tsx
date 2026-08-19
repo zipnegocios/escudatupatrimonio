@@ -34,6 +34,15 @@ export function IconSearch(props: { size?: number }) {
   );
 }
 
+export function IconRefresh(props: { size?: number }) {
+  return (
+    <Base size={props.size}>
+      <path d="M21 12a9 9 0 0 1-15.5 6.3M3 12a9 9 0 0 1 15.5-6.3" />
+      <path d="M3 4v5h5M21 20v-5h-5" />
+    </Base>
+  );
+}
+
 export function IconSend(props: { size?: number }) {
   return (
     <Base size={props.size}>

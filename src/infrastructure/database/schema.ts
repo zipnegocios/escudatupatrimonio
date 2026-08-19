@@ -167,6 +167,12 @@ export const whatsappConversations = pgTable(
     // conversación y después solo cambia si un agente la reclasifica a mano.
     kind: text("kind").notNull().default("UNCLASSIFIED"),
     displayName: text("display_name"),
+    // Número real del contacto. remoteJid identifica la conversación pero,
+    // con el JID nuevo de WhatsApp (@lid), no contiene el teléfono real —
+    // es un identificador opaco. Se resuelve aparte (ver
+    // BaileysGateway.resolvePhoneNumber) y se usa para el match con leads
+    // y para mostrarlo en la UI en vez del LID.
+    phoneNumber: text("phone_number"),
     // URL directa del CDN de WhatsApp, cacheada al crear la conversación —
     // no se re-consulta en cada mensaje, la foto de perfil no cambia tan
     // seguido como para justificar el viaje al worker en cada poll.

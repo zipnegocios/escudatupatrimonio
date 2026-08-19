@@ -10,6 +10,10 @@ export interface IncomingWhatsAppMedia {
 
 export interface IncomingWhatsAppMessage {
   remoteJid: string;
+  // Número real del contacto, sin el sufijo del JID. Con @lid, remoteJid
+  // es un identificador opaco — este es el único campo con el teléfono
+  // real, cuando WhatsApp lo expone (ver BaileysGateway.resolvePhoneNumber).
+  phoneNumber: string | null;
   displayName: string | null;
   waMessageId: string;
   contentText: string | null;
@@ -46,4 +50,8 @@ export interface WhatsAppGateway {
   // foto o la tiene restringida por privacidad. No hace falta bajarla ni
   // guardarla nosotros, solo cachear la URL.
   getProfilePictureUrl(jid: string): Promise<string | null>;
+  // Resolución bajo demanda (botón "Resolver número" del panel) — para un
+  // jid @lid solo puede consultar el mapeo LID↔teléfono que Baileys ya
+  // tenga cacheado localmente, sin esperar un mensaje nuevo del contacto.
+  resolvePhoneNumberForJid(jid: string): Promise<string | null>;
 }

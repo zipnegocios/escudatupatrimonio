@@ -8,6 +8,7 @@ import {
   IconCheck,
   IconMic,
   IconPaperclip,
+  IconRefresh,
   IconSearch,
   IconSend,
   IconStop,
@@ -19,6 +20,7 @@ import { Avatar } from "@/presentation/admin/whatsapp/Avatar";
 interface Conversation {
   id: string;
   remoteJid: string;
+  phoneNumber: string | null;
   displayName: string | null;
   avatarUrl: string | null;
   lastMessageAt: string | null;
@@ -38,8 +40,18 @@ interface Message {
   createdAt: string;
 }
 
+// Con @lid, remoteJid es un identificador opaco de WhatsApp, no el teléfono
+// real — hay que preferir phoneNumber (resuelto en el backend) cuando existe.
+function contactPhone(conversation: Conversation): string {
+  return conversation.phoneNumber ?? conversation.remoteJid.split("@")[0];
+}
+
+function isLidJid(remoteJid: string): boolean {
+  return remoteJid.endsWith("@lid") || remoteJid.endsWith("@hosted.lid");
+}
+
 function contactName(conversation: Conversation): string {
-  return conversation.displayName ?? conversation.remoteJid.split("@")[0];
+  return conversation.displayName ?? contactPhone(conversation);
 }
 
 function formatTime(iso: string): string {
@@ -110,6 +122,7 @@ export function ChatInbox() {
   const [recording, setRecording] = useState(false);
   const [newLeadNombre, setNewLeadNombre] = useState("");
   const [creatingLead, setCreatingLead] = useState(false);
+  const [resolvingPhone, setResolvingPhone] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
   const pendingLeadIdRef = useRef<string | null>(null);
@@ -223,6 +236,28 @@ export function ChatInbox() {
     }
   };
 
+  const handleResolvePhone = async (conversationId: string, remoteJid: string): Promise<void> => {
+    setResolvingPhone(true);
+    try {
+      const response = await fetch(`/api/admin/whatsapp/conversations/${conversationId}/resolve-phone`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ remoteJid }),
+      });
+      const data = (await response.json()) as { ok: boolean; phoneNumber: string | null };
+      if (data.ok && data.phoneNumber) {
+        setConversations((prev) =>
+          prev.map((c) => (c.id === conversationId ? { ...c, phoneNumber: data.phoneNumber } : c)),
+        );
+        if (selected?.id === conversationId) {
+          setSelected((prev) => (prev ? { ...prev, phoneNumber: data.phoneNumber } : prev));
+        }
+      }
+    } finally {
+      setResolvingPhone(false);
+    }
+  };
+
   const handleDelete = async (conversationId: string): Promise<void> => {
     if (!window.confirm("¿Borrar esta conversación completa? Se pierden todos los mensajes.")) {
       return;
@@ -304,7 +339,7 @@ export function ChatInbox() {
   const handleCreateLead = async (): Promise<void> => {
     if (!selected || newLeadNombre.trim().length === 0) return;
     setCreatingLead(true);
-    const telefono = selected.remoteJid.split("@")[0];
+    const telefono = contactPhone(selected);
     const response = await fetch("/api/admin/leads", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -406,7 +441,7 @@ export function ChatInbox() {
                     </span>
                     <span className="mt-0.5 flex items-center justify-between gap-2">
                       <span className="truncate text-xs text-text-muted">
-                        {conversation.kind === "LEAD" ? "Lead" : conversation.kind === "DIRECT_CLIENT" ? "Cliente directo" : conversation.remoteJid.split("@")[0]}
+                        {conversation.kind === "LEAD" ? "Lead" : conversation.kind === "DIRECT_CLIENT" ? "Cliente directo" : contactPhone(conversation)}
                       </span>
                       {conversation.unreadCount > 0 && (
                         <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-wa-accent px-1.5 text-[11px] font-medium text-white">
@@ -486,6 +521,19 @@ export function ChatInbox() {
                     <p className="text-xs text-text-muted">Sin lead asociado</p>
                   )}
                 </div>
+                {isLidJid(selected.remoteJid) && !selected.phoneNumber && (
+                  <button
+                    type="button"
+                    onClick={() => handleResolvePhone(selected.id, selected.remoteJid)}
+                    disabled={resolvingPhone}
+                    title="Resolver número real"
+                    aria-label="Resolver número real"
+                    className="flex shrink-0 items-center gap-1 rounded-full px-2 py-1.5 text-xs text-text-muted hover:bg-bg-elevated hover:text-text-primary disabled:opacity-50"
+                  >
+                    <IconRefresh size={15} />
+                    {resolvingPhone ? "Resolviendo…" : "Resolver número"}
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={() => handleDelete(selected.id)}

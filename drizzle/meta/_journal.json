@@ -57,6 +57,13 @@
       "when": 1787129558264,
       "tag": "0007_neat_colleen_wing",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1787171154472,
+      "tag": "0008_tiny_firestar",
+      "breakpoints": true
     }
   ]
 }

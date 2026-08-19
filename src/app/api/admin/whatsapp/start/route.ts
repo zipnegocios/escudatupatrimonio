@@ -51,6 +51,7 @@ export async function POST(request: Request): Promise<Response> {
   const created = await whatsAppRepository.upsertConversation({
     sessionId: session.id,
     remoteJid,
+    phoneNumber: remoteJid.split("@")[0] ?? null,
     displayName: lead.nombre,
     leadId: lead.id,
     kind: "LEAD",

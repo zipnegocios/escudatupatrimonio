@@ -1,0 +1,1 @@
+ALTER TABLE "whatsapp_conversations" ADD COLUMN "phone_number" text;

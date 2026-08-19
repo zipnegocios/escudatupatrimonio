@@ -80,6 +80,23 @@ export async function fetchAvatarUrlViaWorker(jid: string): Promise<string | nul
   }
 }
 
+// null si el worker no está disponible o el mapeo aún no se conoce — nunca
+// lanza, el llamador debe poder mostrar "no se pudo resolver" sin caerse.
+export async function resolvePhoneNumberViaWorker(jid: string): Promise<string | null> {
+  try {
+    const { url, secret } = requireWorkerConfig();
+    const response = await fetch(`${url}/internal/resolve-phone?jid=${encodeURIComponent(jid)}`, {
+      headers: { Authorization: `Bearer ${secret}` },
+      cache: "no-store",
+    });
+    if (!response.ok) return null;
+    const data = (await response.json()) as { phoneNumber: string | null };
+    return data.phoneNumber;
+  } catch {
+    return null;
+  }
+}
+
 export async function relinkViaWorker(): Promise<void> {
   const { url, secret } = requireWorkerConfig();
   const response = await fetch(`${url}/internal/relink`, {
