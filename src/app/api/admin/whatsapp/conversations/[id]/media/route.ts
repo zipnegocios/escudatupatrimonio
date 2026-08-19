@@ -7,10 +7,16 @@ import { sendMediaViaWorker } from "@/infrastructure/whatsapp/worker-client";
 
 const MAX_BYTES = 25 * 1024 * 1024; // 25MB — límite razonable para R2 + WhatsApp
 
-function inferMediaType(mimeType: string, asVoiceNote: boolean): WhatsAppMediaType | null {
+// Cualquier audio que se manda desde el panel llega como nota de voz nativa
+// — nunca como archivo adjunto. Es lo que pidió el usuario explícitamente:
+// "que lleguen como si fuese una nota de voz nativa del sistema, no como un
+// audio adjunto". El tipo AUDIO (no-ptt) sigue existiendo en el dominio
+// para clasificar audio que WhatsApp mande INBOUND sin ptt, pero de este
+// lado (envío) ya no se usa.
+function inferMediaType(mimeType: string): WhatsAppMediaType | null {
   if (mimeType.startsWith("image/")) return "IMAGE";
   if (mimeType.startsWith("video/")) return "VIDEO";
-  if (mimeType.startsWith("audio/")) return asVoiceNote ? "VOICE_NOTE" : "AUDIO";
+  if (mimeType.startsWith("audio/")) return "VOICE_NOTE";
   return "DOCUMENT";
 }
 
@@ -35,7 +41,6 @@ export async function POST(
   const file = formData.get("file");
   const remoteJid = formData.get("remoteJid");
   const caption = formData.get("caption");
-  const asVoiceNote = formData.get("asVoiceNote") === "true";
 
   if (!(file instanceof File) || typeof remoteJid !== "string" || remoteJid.length === 0) {
     return Response.json({ ok: false, reason: "INVALID_BODY" }, { status: 400 });
@@ -45,7 +50,7 @@ export async function POST(
     return Response.json({ ok: false, reason: "FILE_TOO_LARGE" }, { status: 413 });
   }
 
-  const mediaType = inferMediaType(file.type, asVoiceNote);
+  const mediaType = inferMediaType(file.type);
   if (!mediaType) {
     return Response.json({ ok: false, reason: "UNSUPPORTED_TYPE" }, { status: 400 });
   }
@@ -59,9 +64,10 @@ export async function POST(
   // declaremos — ver el comentario en transcodeToOggOpus.
   if (mediaType === "VOICE_NOTE") {
     try {
-      buffer = await transcodeToOggOpus(buffer);
+      buffer = await transcodeToOggOpus(buffer, file.type);
       mediaMimeType = "audio/ogg; codecs=opus";
     } catch (error) {
+      console.error("[whatsapp/media] fallo al convertir a OGG/Opus:", error);
       return Response.json(
         { ok: false, reason: "TRANSCODE_FAILED", message: (error as Error).message },
         { status: 502 },
@@ -85,6 +91,7 @@ export async function POST(
 
     return Response.json({ ok: true });
   } catch (error) {
+    console.error("[whatsapp/media] fallo al subir o mandar el adjunto:", error);
     return Response.json(
       { ok: false, reason: "SEND_FAILED", message: (error as Error).message },
       { status: 502 },

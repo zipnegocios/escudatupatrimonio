@@ -64,8 +64,8 @@ export function ChatInbox() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
-  const [asVoiceNote, setAsVoiceNote] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [recording, setRecording] = useState(false);
   const [newLeadNombre, setNewLeadNombre] = useState("");
   const [creatingLead, setCreatingLead] = useState(false);
@@ -164,22 +164,37 @@ export function ChatInbox() {
     setSending(false);
   };
 
-  const handleAttach = async (file: File, forceVoiceNote?: boolean): Promise<void> => {
+  const handleAttach = async (file: File): Promise<void> => {
     if (!selected) return;
     setUploading(true);
+    setUploadError(null);
     const formData = new FormData();
     formData.append("file", file);
     formData.append("remoteJid", selected.remoteJid);
-    formData.append("asVoiceNote", String(forceVoiceNote ?? asVoiceNote));
-    await fetch(`/api/admin/whatsapp/conversations/${selected.id}/media`, {
-      method: "POST",
-      body: formData,
-    });
+    try {
+      const response = await fetch(`/api/admin/whatsapp/conversations/${selected.id}/media`, {
+        method: "POST",
+        body: formData,
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+        setUploadError(data?.message ?? data?.reason ?? `Error ${response.status} al enviar.`);
+      }
+    } catch {
+      setUploadError("No se pudo conectar con el servidor.");
+    }
     setUploading(false);
   };
 
   const handleStartRecording = async (): Promise<void> => {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    setUploadError(null);
+    let stream: MediaStream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch {
+      setUploadError("No se pudo acceder al micrófono — revisá los permisos del navegador.");
+      return;
+    }
     // Formato que Chrome/Edge/Firefox saben grabar sin librerías aparte —
     // el worker no necesita convertirlo, WhatsApp acepta ogg/opus.
     const recorder = new MediaRecorder(stream, { mimeType: "audio/webm;codecs=opus" });
@@ -191,7 +206,7 @@ export function ChatInbox() {
       stream.getTracks().forEach((track) => track.stop());
       const blob = new Blob(recordedChunksRef.current, { type: "audio/webm" });
       const file = new File([blob], "nota-de-voz.webm", { type: "audio/webm" });
-      void handleAttach(file, true);
+      void handleAttach(file);
     };
     mediaRecorderRef.current = recorder;
     recorder.start();
@@ -374,16 +389,8 @@ export function ChatInbox() {
                   >
                     {recording ? "⏹ Detener y enviar nota de voz" : "🎤 Grabar nota de voz"}
                   </button>
-                  <label className="flex items-center gap-1">
-                    <input
-                      type="checkbox"
-                      checked={asVoiceNote}
-                      onChange={(e) => setAsVoiceNote(e.target.checked)}
-                    />
-                    Enviar audio adjunto como nota de voz
-                  </label>
                   <label className="cursor-pointer rounded border border-border-card px-2 py-1">
-                    {uploading ? "Subiendo…" : "Adjuntar imagen/audio/video"}
+                    {uploading ? "Subiendo…" : "Adjuntar imagen/video/audio"}
                     <input
                       type="file"
                       accept="image/*,video/*,audio/*"
@@ -396,7 +403,9 @@ export function ChatInbox() {
                       }}
                     />
                   </label>
+                  <span>Todo audio se manda como nota de voz nativa.</span>
                 </div>
+                {uploadError && <p className="text-sm text-caution">{uploadError}</p>}
                 <div className="flex gap-2">
                   <input
                     type="text"
