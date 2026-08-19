@@ -578,13 +578,15 @@ export function ChatInbox() {
                   {recording ? <IconStop size={18} /> : <IconMic size={18} />}
                 </button>
                 <label
-                  title="Adjuntar imagen, video o audio"
+                  title="Adjuntar imagen, video, audio o documento"
                   className="cursor-pointer rounded-full p-2.5 text-text-secondary hover:bg-bg-elevated"
                 >
                   <IconPaperclip size={18} />
                   <input
                     type="file"
-                    accept="image/*,video/*,audio/*"
+                    // Sin esto el selector de archivos ni siquiera dejaba
+                    // elegir un PDF u otro documento — quedaban afuera del
+                    // todo, no es que fallara el envío.
                     className="hidden"
                     disabled={uploading}
                     onChange={(e) => {

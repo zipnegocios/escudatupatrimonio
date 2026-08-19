@@ -20,7 +20,7 @@ export default async function AdminProtectedLayout({ children }: { children: Rea
   return (
     <div className="flex h-full select-text flex-col bg-bg-primary">
       <AdminHeader name={user.displayName ?? user.username} />
-      <main className="mx-auto w-full max-w-5xl flex-1 overflow-y-auto px-4 py-8">
+      <main className="mx-auto min-h-0 w-full max-w-5xl flex-1 overflow-y-auto px-4 py-8">
         {children}
       </main>
     </div>
