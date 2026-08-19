@@ -19,6 +19,13 @@ const STATUS_LABEL: Record<string, string> = {
   LOGGED_OUT: "Sesión cerrada",
 };
 
+const STATUS_DOT: Record<string, string> = {
+  DISCONNECTED: "bg-text-muted",
+  PAIRING_QR: "bg-gold-primary",
+  CONNECTED: "bg-wa-accent",
+  LOGGED_OUT: "bg-caution",
+};
+
 export function WhatsAppQrPanel() {
   const [status, setStatus] = useState<string | null>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
@@ -61,32 +68,34 @@ export function WhatsAppQrPanel() {
   };
 
   return (
-    <div className="rounded-xl border border-border-card bg-bg-surface p-4">
-      <h2 className="text-sm font-semibold text-text-primary">Vínculo de WhatsApp</h2>
-
-      {error && <p className="mt-2 text-sm text-caution">{error}</p>}
-
-      {!error && (
-        <p className="mt-2 text-sm text-text-secondary">
-          {status ? (STATUS_LABEL[status] ?? status) : "Consultando estado…"}
-        </p>
-      )}
+    <div className="flex flex-col gap-4 rounded-xl border border-border-card bg-bg-surface p-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex items-center gap-3">
+        <span
+          className={`h-2.5 w-2.5 shrink-0 rounded-full ${status ? STATUS_DOT[status] ?? "bg-text-muted" : "bg-text-muted"}`}
+        />
+        <div>
+          <h2 className="text-sm font-semibold text-text-primary">Vínculo de WhatsApp</h2>
+          {error ? (
+            <p className="text-sm text-caution">{error}</p>
+          ) : (
+            <p className="text-sm text-text-secondary">
+              {status ? (STATUS_LABEL[status] ?? status) : "Consultando estado…"}
+            </p>
+          )}
+        </div>
+      </div>
 
       {qrDataUrl && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={qrDataUrl} alt="Código QR de WhatsApp" className="mt-4 h-56 w-56" />
-      )}
-
-      {status === "CONNECTED" && (
-        <p className="mt-2 text-sm text-text-secondary">
-          Número vinculado. Los mensajes entrantes aparecen en el inbox debajo.
-        </p>
+        <div className="rounded-xl border border-border-card bg-white p-2">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={qrDataUrl} alt="Código QR de WhatsApp" className="h-40 w-40" />
+        </div>
       )}
 
       <button
         type="button"
         onClick={handleRelink}
-        className="mt-4 rounded-lg border border-border-card px-3 py-1.5 text-sm text-text-secondary"
+        className="cursor-pointer self-start rounded-full border border-border-card px-4 py-2 text-sm text-text-secondary hover:bg-bg-elevated sm:self-center"
       >
         Generar nuevo QR / re-vincular
       </button>

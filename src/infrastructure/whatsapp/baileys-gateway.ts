@@ -10,7 +10,6 @@ import makeWASocket, {
 import pino from "pino";
 import type {
   IncomingWhatsAppMedia,
-  IncomingWhatsAppMessage,
   WhatsAppGateway,
   WhatsAppMediaType,
   WhatsAppMessageHandler,
@@ -209,6 +208,19 @@ export class BaileysGateway implements WhatsAppGateway {
 
     const result = await this.socket.sendMessage(jid, content);
     return { waMessageId: result?.key.id ?? randomUUID() };
+  }
+
+  // undefined tanto si no hay socket como si WhatsApp no la expone (sin
+  // foto, o el contacto restringe quién puede verla) — en ambos casos el
+  // llamador cae al avatar de iniciales.
+  async getProfilePictureUrl(jid: string): Promise<string | null> {
+    if (!this.socket) return null;
+    try {
+      const url = await this.socket.profilePictureUrl(jid, "image");
+      return url ?? null;
+    } catch {
+      return null;
+    }
   }
 
   async logout(): Promise<void> {

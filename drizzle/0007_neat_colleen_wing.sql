@@ -1,0 +1,1 @@
+ALTER TABLE "whatsapp_conversations" ADD COLUMN "avatar_url" text;

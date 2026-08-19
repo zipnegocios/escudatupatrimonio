@@ -53,6 +53,19 @@
   --webgl-line: rgba(201, 168, 76, 0.3);
   --webgl-shield: #4a9fd4;
   --webgl-success: #2db87a;
+
+  /* WhatsApp (panel admin) — acentos inspirados en la UI original de
+     WhatsApp Web (verde de envío/conectado, fondo de chat, burbujas),
+     usados SOLO dentro de src/presentation/admin/whatsapp/. El resto del
+     panel sigue con los tokens de arriba — no es un tema aparte, son
+     acentos puntuales sobre la misma base. */
+  --wa-accent: #25d366;
+  --wa-accent-dark: #128c7e;
+  --wa-header: #f0f2f5;
+  --wa-chat-bg: #efeae2;
+  --wa-bubble-out: #d9fdd3;
+  --wa-bubble-in: #ffffff;
+  --wa-check-read: #53bdeb;
 }
 
 @theme inline {
@@ -92,6 +105,14 @@
   --color-border-subtle: var(--border-subtle);
   --color-border-card: var(--border-card);
   --color-border-focus: var(--border-focus);
+
+  --color-wa-accent: var(--wa-accent);
+  --color-wa-accent-dark: var(--wa-accent-dark);
+  --color-wa-header: var(--wa-header);
+  --color-wa-chat-bg: var(--wa-chat-bg);
+  --color-wa-bubble-out: var(--wa-bubble-out);
+  --color-wa-bubble-in: var(--wa-bubble-in);
+  --color-wa-check-read: var(--wa-check-read);
 
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
 }

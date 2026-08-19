@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { IncomingWhatsAppMessage } from "@/core/ports/whatsapp-gateway";
+import type { IncomingWhatsAppMessage, WhatsAppGateway } from "@/core/ports/whatsapp-gateway";
 import type { LeadRepository } from "@/core/ports/lead-repository";
 import type { MediaStorage } from "@/core/ports/media-storage";
 import type { WhatsAppRepository } from "@/core/ports/whatsapp-repository";
@@ -9,6 +9,7 @@ export interface ReceiveWhatsAppMessageDeps {
   whatsAppRepository: WhatsAppRepository;
   leadRepository: LeadRepository;
   mediaStorage: MediaStorage;
+  whatsAppGateway: Pick<WhatsAppGateway, "getProfilePictureUrl">;
 }
 
 export async function receiveWhatsAppMessage(
@@ -27,7 +28,18 @@ export async function receiveWhatsAppMessage(
     displayName: message.displayName,
     leadId,
     kind: leadId ? "LEAD" : "UNCLASSIFIED",
+    avatarUrl: null,
   });
+
+  // `lastMessageAt` solo es null en la conversación recién creada — evita
+  // pedirle la foto al socket en cada mensaje de un contacto que nunca tuvo
+  // una (no es un error, simplemente no hace falta reintentar).
+  if (conversation.lastMessageAt === null) {
+    const avatarUrl = await deps.whatsAppGateway.getProfilePictureUrl(message.remoteJid);
+    if (avatarUrl) {
+      await deps.whatsAppRepository.updateAvatarUrl(conversation.id, avatarUrl);
+    }
+  }
 
   // Una conversación marcada IGNORED queda totalmente excluida: ni el
   // mensaje se guarda ni el contador de no-leídos se toca. El upsert de

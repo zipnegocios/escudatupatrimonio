@@ -2,6 +2,7 @@ import { z } from "zod";
 import { normalizePhoneToJid } from "@/core/use-cases/whatsapp/normalize-phone-to-jid";
 import { currentUser } from "@/infrastructure/auth/current-user";
 import { leadRepository, whatsAppRepository } from "@/infrastructure/container";
+import { fetchAvatarUrlViaWorker } from "@/infrastructure/whatsapp/worker-client";
 
 const startSchema = z.object({ leadId: z.string().min(1) });
 
@@ -44,12 +45,16 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   const session = await whatsAppRepository.getOrCreateSession("principal");
+  // Si el worker no está disponible esto devuelve null y la conversación
+  // igual se crea — el avatar se completa después con el próximo mensaje.
+  const avatarUrl = await fetchAvatarUrlViaWorker(remoteJid);
   const created = await whatsAppRepository.upsertConversation({
     sessionId: session.id,
     remoteJid,
     displayName: lead.nombre,
     leadId: lead.id,
     kind: "LEAD",
+    avatarUrl,
   });
 
   // El upsert no pisa leadId/kind en una conversación ya existente (a

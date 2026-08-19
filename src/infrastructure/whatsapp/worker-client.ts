@@ -63,6 +63,23 @@ export async function sendMediaViaWorker(input: {
   if (!response.ok) throw new Error(`El worker de WhatsApp respondió ${response.status}`);
 }
 
+// null si el worker no está disponible o el contacto no tiene foto — nunca
+// lanza, el llamador siempre puede caer al avatar de iniciales.
+export async function fetchAvatarUrlViaWorker(jid: string): Promise<string | null> {
+  try {
+    const { url, secret } = requireWorkerConfig();
+    const response = await fetch(`${url}/internal/avatar?jid=${encodeURIComponent(jid)}`, {
+      headers: { Authorization: `Bearer ${secret}` },
+      cache: "no-store",
+    });
+    if (!response.ok) return null;
+    const data = (await response.json()) as { avatarUrl: string | null };
+    return data.avatarUrl;
+  } catch {
+    return null;
+  }
+}
+
 export async function relinkViaWorker(): Promise<void> {
   const { url, secret } = requireWorkerConfig();
   const response = await fetch(`${url}/internal/relink`, {

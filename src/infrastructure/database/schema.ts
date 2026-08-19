@@ -167,6 +167,10 @@ export const whatsappConversations = pgTable(
     // conversación y después solo cambia si un agente la reclasifica a mano.
     kind: text("kind").notNull().default("UNCLASSIFIED"),
     displayName: text("display_name"),
+    // URL directa del CDN de WhatsApp, cacheada al crear la conversación —
+    // no se re-consulta en cada mensaje, la foto de perfil no cambia tan
+    // seguido como para justificar el viaje al worker en cada poll.
+    avatarUrl: text("avatar_url"),
     lastMessageAt: timestamp("last_message_at", { withTimezone: true }),
     unreadCount: integer("unread_count").notNull().default(0),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

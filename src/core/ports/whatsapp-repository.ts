@@ -15,6 +15,7 @@ export interface UpsertConversationInput {
   // debe pisarle la clasificación.
   leadId: string | null;
   kind: string;
+  avatarUrl: string | null;
 }
 
 export interface SaveMessageInput {
@@ -49,4 +50,5 @@ export interface WhatsAppRepository {
   ): Promise<WhatsAppConversationRow | null>;
   // Borra la conversación y, en cascada (FK), todos sus mensajes.
   deleteConversation(id: string): Promise<void>;
+  updateAvatarUrl(id: string, avatarUrl: string | null): Promise<void>;
 }

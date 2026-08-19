@@ -37,4 +37,8 @@ export interface WhatsAppGateway {
   logout(): Promise<void>;
   onMessage(handler: WhatsAppMessageHandler): void;
   onStatusChange(handler: WhatsAppStatusHandler): void;
+  // URL directa del CDN de WhatsApp — undefined si el contacto no tiene
+  // foto o la tiene restringida por privacidad. No hace falta bajarla ni
+  // guardarla nosotros, solo cachear la URL.
+  getProfilePictureUrl(jid: string): Promise<string | null>;
 }

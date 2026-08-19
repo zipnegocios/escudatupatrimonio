@@ -5,6 +5,19 @@ import nextTs from "eslint-config-next/typescript";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
+  {
+    rules: {
+      // Convención estándar: un `_` al inicio marca a propósito que no se
+      // usa (p.ej. destructuring para descartar una key: `const { action:
+      // _action, ...rest } = data`) — sin esto, la única forma de "tirar"
+      // una key es enumerar el resto a mano, que en objetos grandes es
+      // mucho más ilegible que la alternativa.
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+      ],
+    },
+  },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores de eslint-config-next. `.next/**` sin `**/` al

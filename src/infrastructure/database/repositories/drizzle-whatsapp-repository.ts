@@ -52,6 +52,7 @@ export class DrizzleWhatsAppRepository implements WhatsAppRepository {
         displayName: input.displayName,
         leadId: input.leadId,
         kind: input.kind,
+        avatarUrl: input.avatarUrl,
       })
       // A propósito NO se pisan leadId/kind en el conflicto: si un agente ya
       // clasificó esta conversación a mano, un mensaje nuevo no debe
@@ -145,5 +146,9 @@ export class DrizzleWhatsAppRepository implements WhatsAppRepository {
 
   async deleteConversation(id: string): Promise<void> {
     await db.delete(whatsappConversations).where(eq(whatsappConversations.id, id));
+  }
+
+  async updateAvatarUrl(id: string, avatarUrl: string | null): Promise<void> {
+    await db.update(whatsappConversations).set({ avatarUrl }).where(eq(whatsappConversations.id, id));
   }
 }

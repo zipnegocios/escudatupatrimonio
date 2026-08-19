@@ -62,7 +62,7 @@ async function main(): Promise<void> {
 
   gateway.onMessage(async (message) => {
     await receiveWhatsAppMessage(
-      { whatsAppRepository, leadRepository, mediaStorage },
+      { whatsAppRepository, leadRepository, mediaStorage, whatsAppGateway: gateway },
       session.id,
       message,
     );
@@ -117,6 +117,14 @@ async function main(): Promise<void> {
           );
           res.writeHead(200, { "Content-Type": "application/json" });
           res.end(JSON.stringify({ ok: true }));
+          return;
+        }
+
+        if (req.method === "GET" && req.url?.startsWith("/internal/avatar")) {
+          const jid = new URL(req.url, "http://internal").searchParams.get("jid");
+          const avatarUrl = jid ? await gateway.getProfilePictureUrl(jid) : null;
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ avatarUrl }));
           return;
         }
 
