@@ -31,6 +31,7 @@ export interface WhatsAppGateway {
     jid: string,
     url: string,
     type: WhatsAppMediaType,
+    mimeType: string,
     caption: string | null,
   ): Promise<{ waMessageId: string }>;
   logout(): Promise<void>;

@@ -191,6 +191,7 @@ export class BaileysGateway implements WhatsAppGateway {
     jid: string,
     url: string,
     type: WhatsAppMediaType,
+    mimeType: string,
     caption: string | null,
   ): Promise<{ waMessageId: string }> {
     if (!this.socket) throw new Error("WhatsApp gateway no está iniciado");
@@ -201,10 +202,10 @@ export class BaileysGateway implements WhatsAppGateway {
         : type === "VIDEO"
           ? { video: { url }, caption: caption ?? undefined }
           : type === "VOICE_NOTE"
-            ? { audio: { url }, ptt: true, mimetype: "audio/ogg; codecs=opus" }
+            ? { audio: { url }, ptt: true, mimetype: mimeType }
             : type === "AUDIO"
-              ? { audio: { url }, mimetype: "audio/mp4" }
-              : { document: { url }, mimetype: "application/octet-stream", fileName: "archivo" };
+              ? { audio: { url }, mimetype: mimeType }
+              : { document: { url }, mimetype: mimeType, fileName: "archivo" };
 
     const result = await this.socket.sendMessage(jid, content);
     return { waMessageId: result?.key.id ?? randomUUID() };

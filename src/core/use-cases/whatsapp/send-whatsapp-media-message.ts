@@ -25,6 +25,7 @@ export async function sendWhatsAppMediaMessage(
     input.remoteJid,
     input.mediaUrl,
     input.mediaType,
+    input.mediaMimeType,
     input.caption,
   );
   await deps.whatsAppRepository.saveMessage({
