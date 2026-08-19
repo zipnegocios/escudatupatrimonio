@@ -139,14 +139,30 @@ export class BaileysGateway implements WhatsAppGateway {
       if (type !== "notify" || !this.messageHandler) return;
 
       for (const message of messages) {
-        if (!message.key.remoteJid) continue;
+        // Descarta lo que no es un contacto individual real: Estados
+        // (status@broadcast — un único JID compartido por todos los
+        // contactos, por eso todos sus estados caían en una sola
+        // conversación), grupos (@g.us) y canales (@newsletter). Los
+        // contactos sí pueden llegar como @s.whatsapp.net o como @lid
+        // (el JID nuevo de WhatsApp que oculta el número), así que no se
+        // puede filtrar por allowlist de sufijo — solo excluir lo no-1:1.
+        const remoteJid = message.key.remoteJid;
+        if (
+          !remoteJid ||
+          remoteJid === "status@broadcast" ||
+          remoteJid.endsWith("@g.us") ||
+          remoteJid.endsWith("@newsletter") ||
+          remoteJid.endsWith("@broadcast")
+        ) {
+          continue;
+        }
         const fromMe = message.key.fromMe ?? false;
 
         const text = extractText(message.message);
         const media = await this.downloadIncomingMedia(message);
 
         await this.messageHandler({
-          remoteJid: message.key.remoteJid,
+          remoteJid,
           // pushName en un mensaje fromMe es el nombre de la propia cuenta,
           // no el del contacto — pasar eso pisaría el nombre real del
           // contacto en la conversación.
