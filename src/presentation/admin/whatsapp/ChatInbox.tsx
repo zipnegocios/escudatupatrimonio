@@ -114,6 +114,7 @@ export function ChatInbox() {
   const recordedChunksRef = useRef<Blob[]>([]);
   const pendingLeadIdRef = useRef<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const previousMessageCountRef = useRef(0);
 
   useEffect(() => {
     const loadConversations = async (): Promise<void> => {
@@ -146,20 +147,54 @@ export function ChatInbox() {
 
   useEffect(() => {
     if (!selected) return;
+
+    // Envuelto en una función local a propósito: el linter marca como
+    // error llamar a un setState directo en el cuerpo síncrono de un
+    // efecto (ver el mismo patrón en WhatsAppQrPanel).
+    const resetForNewConversation = (): void => {
+      // Se limpia al cambiar de conversación — si no, se ven por un
+      // instante los mensajes de la conversación anterior mientras carga
+      // la nueva.
+      setMessages([]);
+      previousMessageCountRef.current = 0;
+    };
+    resetForNewConversation();
+
     const loadMessages = async (): Promise<void> => {
       const response = await fetch(`/api/admin/whatsapp/conversations/${selected.id}/messages`, {
         cache: "no-store",
       });
       const data = await response.json();
-      if (data.ok) setMessages(data.messages);
+      if (!data.ok) return;
+      setMessages((prev) => {
+        const prevById = new Map(prev.map((m) => [m.id, m]));
+        // La URL firmada de un adjunto cambia en cada respuesta aunque sea
+        // el mismo archivo — si se la reemplaza en cada poll, <audio>/
+        // <video>/<img> reinician la carga solos cada 3s y cortan la
+        // reproducción. Se conserva la URL ya vista para mensajes que ya
+        // teníamos.
+        return (data.messages as Message[]).map((incoming) => {
+          const existing = prevById.get(incoming.id);
+          if (existing?.mediaUrl && incoming.mediaUrl) {
+            return { ...incoming, mediaUrl: existing.mediaUrl };
+          }
+          return incoming;
+        });
+      });
     };
     loadMessages();
     const interval = setInterval(loadMessages, 3000);
     return () => clearInterval(interval);
   }, [selected]);
 
+  // Solo baja el scroll cuando realmente llegan mensajes nuevos — antes se
+  // disparaba en cada poll (cada 3s) aunque no hubiera nada nuevo, lo que
+  // se sentía como que "la pantalla salta sola" cada pocos segundos.
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ block: "end" });
+    if (messages.length > previousMessageCountRef.current) {
+      messagesEndRef.current?.scrollIntoView({ block: "end" });
+    }
+    previousMessageCountRef.current = messages.length;
   }, [messages]);
 
   const visible = useMemo(() => {
@@ -300,10 +335,13 @@ export function ChatInbox() {
 
   return (
     <div className="mt-6 overflow-hidden rounded-xl border border-border-card">
-      <div className="grid grid-cols-1 md:grid-cols-3" style={{ height: "min(75vh, 720px)" }}>
+      <div
+        className="grid min-h-0 grid-cols-1 md:grid-cols-3"
+        style={{ height: "min(75vh, 720px)" }}
+      >
         {/* ---- Lista de conversaciones ---- */}
         <div
-          className={`flex flex-col border-border-card md:col-span-1 md:border-r ${
+          className={`h-full min-h-0 flex-col border-border-card md:col-span-1 md:border-r ${
             selected ? "hidden md:flex" : "flex"
           }`}
         >
@@ -344,7 +382,7 @@ export function ChatInbox() {
             </div>
           </div>
 
-          <ul className="flex-1 overflow-y-auto">
+          <ul className="min-h-0 flex-1 overflow-y-auto">
             {visible.map((conversation) => (
               <li key={conversation.id} className="border-b border-border-subtle">
                 <button
@@ -418,7 +456,9 @@ export function ChatInbox() {
         </div>
 
         {/* ---- Conversación activa ---- */}
-        <div className={`flex flex-col md:col-span-2 ${selected ? "flex" : "hidden md:flex"}`}>
+        <div
+          className={`h-full min-h-0 flex-col md:col-span-2 ${selected ? "flex" : "hidden md:flex"}`}
+        >
           {selected ? (
             <>
               <div className="flex items-center gap-3 border-b border-border-card bg-wa-header px-3 py-2.5">
@@ -478,7 +518,7 @@ export function ChatInbox() {
                 </div>
               )}
 
-              <div className="flex-1 space-y-1 overflow-y-auto bg-wa-chat-bg p-4">
+              <div className="min-h-0 flex-1 space-y-1 overflow-y-auto bg-wa-chat-bg p-4">
                 {messageGroups.map((group) => (
                   <div key={group.label}>
                     <div className="my-2 flex justify-center">
