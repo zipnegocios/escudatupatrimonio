@@ -36,6 +36,13 @@ const envSchema = z.object({
   RESEND_WEBHOOK_SECRET: optionalString(),
   EMAIL_FROM_ADDRESS: optionalString(),
   EMAIL_NOTIFY_TO: optionalString(),
+  // Opcionales: solo hacen falta si el envío/recepción de medios de
+  // WhatsApp (fotos, notas de voz, video) está activo.
+  R2_ACCOUNT_ID: optionalString(),
+  R2_ACCESS_KEY_ID: optionalString(),
+  R2_SECRET_ACCESS_KEY: optionalString(),
+  R2_BUCKET: optionalString(),
+  R2_ENDPOINT: optionalString(),
 });
 
 export type Env = z.infer<typeof envSchema>;

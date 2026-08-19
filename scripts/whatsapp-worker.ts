@@ -8,12 +8,15 @@
 // dependencia de Baileys (whatsapp-rust-bridge).
 import "dotenv/config";
 import { createServer, type IncomingMessage } from "node:http";
+import type { WhatsAppMediaType } from "@/core/ports/whatsapp-gateway";
 import { receiveWhatsAppMessage } from "@/core/use-cases/whatsapp/receive-whatsapp-message";
+import { sendWhatsAppMediaMessage } from "@/core/use-cases/whatsapp/send-whatsapp-media-message";
 import { sendWhatsAppMessage } from "@/core/use-cases/whatsapp/send-whatsapp-message";
 import { env } from "@/infrastructure/config/env";
 import { pool } from "@/infrastructure/database/db";
 import { DrizzleLeadRepository } from "@/infrastructure/database/repositories/drizzle-lead-repository";
 import { DrizzleWhatsAppRepository } from "@/infrastructure/database/repositories/drizzle-whatsapp-repository";
+import { R2MediaStorage } from "@/infrastructure/storage/r2-media-storage";
 import { BaileysGateway } from "@/infrastructure/whatsapp/baileys-gateway";
 
 const PORT = 4001;
@@ -46,6 +49,7 @@ async function main(): Promise<void> {
 
   const whatsAppRepository = new DrizzleWhatsAppRepository();
   const leadRepository = new DrizzleLeadRepository();
+  const mediaStorage = new R2MediaStorage();
   const session = await whatsAppRepository.getOrCreateSession(SESSION_LABEL);
   const gateway = new BaileysGateway(session.id);
 
@@ -57,7 +61,11 @@ async function main(): Promise<void> {
   });
 
   gateway.onMessage(async (message) => {
-    await receiveWhatsAppMessage({ whatsAppRepository, leadRepository }, session.id, message);
+    await receiveWhatsAppMessage(
+      { whatsAppRepository, leadRepository, mediaStorage },
+      session.id,
+      message,
+    );
   });
 
   await gateway.start();
@@ -87,6 +95,25 @@ async function main(): Promise<void> {
             body.conversationId,
             body.remoteJid,
             body.text,
+          );
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ ok: true }));
+          return;
+        }
+
+        if (req.method === "POST" && req.url === "/internal/send-media") {
+          const body = (await readJsonBody(req)) as {
+            conversationId: string;
+            remoteJid: string;
+            mediaUrl: string;
+            mediaKey: string;
+            mediaMimeType: string;
+            mediaType: WhatsAppMediaType;
+            caption: string | null;
+          };
+          await sendWhatsAppMediaMessage(
+            { whatsAppGateway: gateway, whatsAppRepository },
+            body,
           );
           res.writeHead(200, { "Content-Type": "application/json" });
           res.end(JSON.stringify({ ok: true }));

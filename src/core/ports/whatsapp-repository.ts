@@ -24,6 +24,8 @@ export interface SaveMessageInput {
   messageType: string;
   contentText: string | null;
   status: string;
+  mediaKey?: string | null;
+  mediaMimeType?: string | null;
 }
 
 export interface WhatsAppRepository {
@@ -45,4 +47,6 @@ export interface WhatsAppRepository {
     kind: string,
     leadId: string | null,
   ): Promise<WhatsAppConversationRow | null>;
+  // Borra la conversación y, en cascada (FK), todos sus mensajes.
+  deleteConversation(id: string): Promise<void>;
 }

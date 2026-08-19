@@ -41,3 +41,17 @@ export async function PATCH(
 
   return Response.json({ ok: true, conversation });
 }
+
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> },
+): Promise<Response> {
+  const user = await currentUser();
+  if (!user) {
+    return Response.json({ ok: false, reason: "UNAUTHENTICATED" }, { status: 401 });
+  }
+
+  const { id } = await params;
+  await whatsAppRepository.deleteConversation(id);
+  return Response.json({ ok: true });
+}

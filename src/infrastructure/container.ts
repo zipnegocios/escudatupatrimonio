@@ -5,6 +5,7 @@ import type { EmailLogRepository } from "@/core/ports/email-log-repository";
 import type { EmailReceivingClient } from "@/core/ports/email-receiving-client";
 import type { EmailSender } from "@/core/ports/email-sender";
 import type { LeadRepository } from "@/core/ports/lead-repository";
+import type { MediaStorage } from "@/core/ports/media-storage";
 import type { PasswordHasher } from "@/core/ports/password-hasher";
 import type { SessionRepository } from "@/core/ports/session-repository";
 import type { SessionTokenService } from "@/core/ports/session-token-service";
@@ -21,6 +22,7 @@ import { DrizzleUserRepository } from "@/infrastructure/database/repositories/dr
 import { DrizzleWhatsAppRepository } from "@/infrastructure/database/repositories/drizzle-whatsapp-repository";
 import { ResendEmailSender } from "@/infrastructure/email/resend-email-sender";
 import { ResendReceivingClient } from "@/infrastructure/email/resend-receiving-client";
+import { R2MediaStorage } from "@/infrastructure/storage/r2-media-storage";
 
 /**
  * Composition root: el único lugar donde el core se ata a los adapters
@@ -39,3 +41,4 @@ export const emailLogRepository: EmailLogRepository = new DrizzleEmailLogReposit
 export const emailSender: EmailSender = new ResendEmailSender();
 export const emailReceivingClient: EmailReceivingClient = new ResendReceivingClient();
 export const appointmentRepository: AppointmentRepository = new DrizzleAppointmentRepository();
+export const mediaStorage: MediaStorage = new R2MediaStorage();

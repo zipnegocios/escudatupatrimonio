@@ -76,6 +76,8 @@ export class DrizzleWhatsAppRepository implements WhatsAppRepository {
         messageType: input.messageType,
         contentText: input.contentText,
         status: input.status,
+        mediaKey: input.mediaKey ?? null,
+        mediaMimeType: input.mediaMimeType ?? null,
       })
       // Baileys reentrega eventos (at-least-once): un mismo waMessageId
       // dentro de la misma conversación no debe duplicar la fila.
@@ -139,5 +141,9 @@ export class DrizzleWhatsAppRepository implements WhatsAppRepository {
       .where(eq(whatsappConversations.id, id))
       .returning();
     return row ?? null;
+  }
+
+  async deleteConversation(id: string): Promise<void> {
+    await db.delete(whatsappConversations).where(eq(whatsappConversations.id, id));
   }
 }

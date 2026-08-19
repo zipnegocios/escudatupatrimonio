@@ -184,8 +184,13 @@ export const whatsappMessages = pgTable(
     direction: text("direction").notNull(), // INBOUND | OUTBOUND
     // Idempotencia: Baileys puede reentregar el mismo evento (at-least-once).
     waMessageId: text("wa_message_id").notNull(),
+    // TEXT|IMAGE|AUDIO|VOICE_NOTE|VIDEO|DOCUMENT|OTHER
     messageType: text("message_type").notNull().default("TEXT"),
     contentText: text("content_text"),
+    // Key del objeto en el bucket R2 — el mensaje en sí nunca guarda el
+    // binario, solo la referencia. Se firma una URL de descarga al pedirla.
+    mediaKey: text("media_key"),
+    mediaMimeType: text("media_mime_type"),
     status: text("status").notNull().default("PENDING"),
     rawPayload: jsonb("raw_payload"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { currentUser } from "@/infrastructure/auth/current-user";
-import { whatsAppRepository } from "@/infrastructure/container";
+import { mediaStorage, whatsAppRepository } from "@/infrastructure/container";
 import { sendViaWorker } from "@/infrastructure/whatsapp/worker-client";
 
 export async function GET(
@@ -15,7 +15,22 @@ export async function GET(
   const { id } = await params;
   const messages = await whatsAppRepository.listMessages(id);
   await whatsAppRepository.markRead(id);
-  return Response.json({ ok: true, messages });
+
+  // Se firma una URL de descarga por mensaje con adjunto — el bucket no es
+  // público, así que sin esto el navegador no puede mostrar/reproducir nada.
+  const withMedia = await Promise.all(
+    messages.map(async (message) => {
+      if (!message.mediaKey) return { ...message, mediaUrl: null };
+      try {
+        const mediaUrl = await mediaStorage.getSignedDownloadUrl(message.mediaKey);
+        return { ...message, mediaUrl };
+      } catch {
+        return { ...message, mediaUrl: null };
+      }
+    }),
+  );
+
+  return Response.json({ ok: true, messages: withMedia });
 }
 
 const sendMessageSchema = z.object({

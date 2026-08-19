@@ -2,13 +2,17 @@ import { randomUUID } from "node:crypto";
 import { Boom } from "@hapi/boom";
 import makeWASocket, {
   DisconnectReason,
+  downloadMediaMessage,
   fetchLatestBaileysVersion,
+  type WAMessage,
   type WASocket,
 } from "@whiskeysockets/baileys";
 import pino from "pino";
 import type {
+  IncomingWhatsAppMedia,
   IncomingWhatsAppMessage,
   WhatsAppGateway,
+  WhatsAppMediaType,
   WhatsAppMessageHandler,
   WhatsAppSessionStatus,
   WhatsAppStatusHandler,
@@ -26,6 +30,37 @@ function extractText(message: unknown): string | null {
     extendedTextMessage?: { text?: string };
   } | null;
   return content?.conversation ?? content?.extendedTextMessage?.text ?? null;
+}
+
+interface MediaContent {
+  imageMessage?: { mimetype?: string | null } | null;
+  audioMessage?: { mimetype?: string | null; ptt?: boolean | null } | null;
+  videoMessage?: { mimetype?: string | null } | null;
+  documentMessage?: { mimetype?: string | null } | null;
+}
+
+function detectMedia(message: unknown): { type: WhatsAppMediaType; mimeType: string } | null {
+  const content = message as MediaContent | null;
+  if (!content) return null;
+  if (content.imageMessage) {
+    return { type: "IMAGE", mimeType: content.imageMessage.mimetype ?? "image/jpeg" };
+  }
+  if (content.audioMessage) {
+    return {
+      type: content.audioMessage.ptt ? "VOICE_NOTE" : "AUDIO",
+      mimeType: content.audioMessage.mimetype ?? "audio/ogg",
+    };
+  }
+  if (content.videoMessage) {
+    return { type: "VIDEO", mimeType: content.videoMessage.mimetype ?? "video/mp4" };
+  }
+  if (content.documentMessage) {
+    return {
+      type: "DOCUMENT",
+      mimeType: content.documentMessage.mimetype ?? "application/octet-stream",
+    };
+  }
+  return null;
 }
 
 export class BaileysGateway implements WhatsAppGateway {
@@ -110,20 +145,68 @@ export class BaileysGateway implements WhatsAppGateway {
         if (message.key.fromMe || !message.key.remoteJid) continue;
 
         const text = extractText(message.message);
+        const media = await this.downloadIncomingMedia(message);
+
         await this.messageHandler({
           remoteJid: message.key.remoteJid,
           displayName: message.pushName ?? null,
           waMessageId: message.key.id ?? randomUUID(),
           contentText: text,
-          messageType: text ? "TEXT" : "OTHER",
+          messageType: media?.type ?? (text ? "TEXT" : "OTHER"),
+          media,
         });
       }
     });
   }
 
+  // Devuelve null tanto si el mensaje no es de medios como si la descarga
+  // falla (p.ej. el media ya expiró del lado de WhatsApp) — un mensaje que
+  // no se puede bajar igual se registra, solo que sin adjunto.
+  private async downloadIncomingMedia(message: WAMessage): Promise<IncomingWhatsAppMedia | null> {
+    const detected = detectMedia(message.message);
+    if (!detected || !this.socket) return null;
+
+    try {
+      const buffer = await downloadMediaMessage(
+        message,
+        "buffer",
+        {},
+        { logger, reuploadRequest: this.socket.updateMediaMessage },
+      );
+      return { buffer, mimeType: detected.mimeType, type: detected.type };
+    } catch {
+      return null;
+    }
+  }
+
   async sendMessage(jid: string, text: string): Promise<{ waMessageId: string }> {
     if (!this.socket) throw new Error("WhatsApp gateway no está iniciado");
     const result = await this.socket.sendMessage(jid, { text });
+    return { waMessageId: result?.key.id ?? randomUUID() };
+  }
+
+  // `url` es una URL firmada de R2 con vida corta — el propio socket la
+  // descarga, no hace falta bajar el archivo en este proceso.
+  async sendMedia(
+    jid: string,
+    url: string,
+    type: WhatsAppMediaType,
+    caption: string | null,
+  ): Promise<{ waMessageId: string }> {
+    if (!this.socket) throw new Error("WhatsApp gateway no está iniciado");
+
+    const content =
+      type === "IMAGE"
+        ? { image: { url }, caption: caption ?? undefined }
+        : type === "VIDEO"
+          ? { video: { url }, caption: caption ?? undefined }
+          : type === "VOICE_NOTE"
+            ? { audio: { url }, ptt: true, mimetype: "audio/ogg; codecs=opus" }
+            : type === "AUDIO"
+              ? { audio: { url }, mimetype: "audio/mp4" }
+              : { document: { url }, mimetype: "application/octet-stream", fileName: "archivo" };
+
+    const result = await this.socket.sendMessage(jid, content);
     return { waMessageId: result?.key.id ?? randomUUID() };
   }
 

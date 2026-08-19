@@ -1,11 +1,14 @@
+import { randomUUID } from "node:crypto";
 import type { IncomingWhatsAppMessage } from "@/core/ports/whatsapp-gateway";
 import type { LeadRepository } from "@/core/ports/lead-repository";
+import type { MediaStorage } from "@/core/ports/media-storage";
 import type { WhatsAppRepository } from "@/core/ports/whatsapp-repository";
 import { matchLeadByPhone } from "@/core/use-cases/whatsapp/match-lead-by-phone";
 
 export interface ReceiveWhatsAppMessageDeps {
   whatsAppRepository: WhatsAppRepository;
   leadRepository: LeadRepository;
+  mediaStorage: MediaStorage;
 }
 
 export async function receiveWhatsAppMessage(
@@ -26,6 +29,30 @@ export async function receiveWhatsAppMessage(
     kind: leadId ? "LEAD" : "UNCLASSIFIED",
   });
 
+  // Una conversación marcada IGNORED queda totalmente excluida: ni el
+  // mensaje se guarda ni el contador de no-leídos se toca. El upsert de
+  // arriba nunca pisa un kind ya guardado (ver el adapter), así que esto
+  // refleja la clasificación real, no la recién calculada.
+  if (conversation.kind === "IGNORED") {
+    return;
+  }
+
+  let mediaKey: string | null = null;
+  let mediaMimeType: string | null = null;
+
+  if (message.media) {
+    // Si R2 no está configurado o falla, el mensaje igual se guarda (sin
+    // adjunto) — un problema de almacenamiento no debe perder el mensaje.
+    try {
+      mediaKey = `whatsapp/${conversation.id}/${randomUUID()}`;
+      await deps.mediaStorage.upload(mediaKey, message.media.buffer, message.media.mimeType);
+      mediaMimeType = message.media.mimeType;
+    } catch {
+      mediaKey = null;
+      mediaMimeType = null;
+    }
+  }
+
   await deps.whatsAppRepository.saveMessage({
     conversationId: conversation.id,
     direction: "INBOUND",
@@ -33,5 +60,7 @@ export async function receiveWhatsAppMessage(
     messageType: message.messageType,
     contentText: message.contentText,
     status: "RECEIVED",
+    mediaKey,
+    mediaMimeType,
   });
 }

@@ -1,4 +1,5 @@
 import "server-only";
+import type { WhatsAppMediaType } from "@/core/ports/whatsapp-gateway";
 import { env } from "@/infrastructure/config/env";
 
 interface WorkerStatusResponse {
@@ -40,6 +41,24 @@ export async function sendViaWorker(
     method: "POST",
     headers: { Authorization: `Bearer ${secret}`, "Content-Type": "application/json" },
     body: JSON.stringify({ conversationId, remoteJid, text }),
+  });
+  if (!response.ok) throw new Error(`El worker de WhatsApp respondió ${response.status}`);
+}
+
+export async function sendMediaViaWorker(input: {
+  conversationId: string;
+  remoteJid: string;
+  mediaUrl: string;
+  mediaKey: string;
+  mediaMimeType: string;
+  mediaType: WhatsAppMediaType;
+  caption: string | null;
+}): Promise<void> {
+  const { url, secret } = requireWorkerConfig();
+  const response = await fetch(`${url}/internal/send-media`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${secret}`, "Content-Type": "application/json" },
+    body: JSON.stringify(input),
   });
   if (!response.ok) throw new Error(`El worker de WhatsApp respondió ${response.status}`);
 }
