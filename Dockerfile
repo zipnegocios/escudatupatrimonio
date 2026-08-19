@@ -37,6 +37,13 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# ffmpeg real de los repos de Alpine (musl) — el binario que descarga
+# ffmpeg-static por npm está compilado para glibc y falla en este entorno
+# (mismo tipo de incompatibilidad que ya tuvimos con el binario nativo de
+# argon2). Se usa para convertir audio a OGG/Opus antes de mandar notas de
+# voz por WhatsApp — ver src/infrastructure/media/transcode-to-opus-ogg.ts.
+RUN apk add --no-cache ffmpeg
+
 RUN addgroup --system --gid 1001 nodejs \
   && adduser --system --uid 1001 nextjs
 

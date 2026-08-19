@@ -1,9 +1,28 @@
+import { execFileSync } from "node:child_process";
 import { PassThrough } from "node:stream";
-import ffmpegPath from "ffmpeg-static";
+import ffmpegStaticPath from "ffmpeg-static";
 import ffmpeg from "fluent-ffmpeg";
 
-if (ffmpegPath) {
-  ffmpeg.setFfmpegPath(ffmpegPath);
+// En producción (Docker/Alpine) hay un `ffmpeg` real instalado por apk en
+// el PATH — ver el Dockerfile. Se usa ese siempre que esté disponible: el
+// binario que trae ffmpeg-static por npm está compilado para glibc y no
+// corre en Alpine (musl), el mismo problema que ya tuvimos con argon2. El
+// paquete ffmpeg-static queda solo como respaldo para desarrollo local
+// (Windows/Mac) donde no hay ffmpeg del sistema.
+function resolveFfmpegPath(): string | undefined {
+  try {
+    execFileSync(process.platform === "win32" ? "where" : "which", ["ffmpeg"], {
+      stdio: "ignore",
+    });
+    return undefined; // está en el PATH — dejar que fluent-ffmpeg lo resuelva solo
+  } catch {
+    return ffmpegStaticPath ?? undefined;
+  }
+}
+
+const resolvedFfmpegPath = resolveFfmpegPath();
+if (resolvedFfmpegPath) {
+  ffmpeg.setFfmpegPath(resolvedFfmpegPath);
 }
 
 const TRANSCODE_TIMEOUT_MS = 30_000;
