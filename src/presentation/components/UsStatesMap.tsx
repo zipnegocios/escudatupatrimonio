@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getStateByCode } from "@/core/entities/us-states";
 import { CTAButton } from "@/presentation/components/CTAButton";
 
@@ -217,9 +217,41 @@ const STATE_PATHS: StatePath[] = [
   },
 ];
 
-// DC y PR no tienen forma visible a esta escala del mapa (DC es
-// minúsculo, PR es una isla aparte) — se ofrecen como chips.
-const EXTRA_STATE_CODES = ["DC", "PR"];
+interface BBox {
+  cx: number;
+  cy: number;
+  w: number;
+  h: number;
+}
+
+// Por debajo de este ancho/alto (en unidades del viewBox) la inicial de 2
+// letras no entra en la forma sin salirse o pisar al estado vecino (afecta
+// sobre todo al cluster del noreste: RI, DE, CT...) — se le sigue pudiendo
+// tocar/hacer hover, solo no lleva texto permanente encima.
+const MIN_LABEL_SIZE = 22;
+
+function StateTooltip({ x, y, label }: { x: number; y: number; label: string }) {
+  const fontSize = 13;
+  const paddingX = 7;
+  const width = label.length * fontSize * 0.58 + paddingX * 2;
+  const height = fontSize + 10;
+  return (
+    <g transform={`translate(${x - width / 2}, ${y - height - 8})`} className="pointer-events-none">
+      <rect width={width} height={height} rx={6} className="fill-bg-trust-dark" />
+      <text
+        x={width / 2}
+        y={height / 2 + 1}
+        textAnchor="middle"
+        dominantBaseline="middle"
+        fontSize={fontSize}
+        fontWeight={600}
+        className="fill-text-ondark"
+      >
+        {label}
+      </text>
+    </g>
+  );
+}
 
 interface UsStatesMapProps {
   onSelect: (code: string) => void;
@@ -227,7 +259,37 @@ interface UsStatesMapProps {
 
 export function UsStatesMap({ onSelect }: UsStatesMapProps) {
   const [selected, setSelected] = useState<string | null>(null);
+  const [hovered, setHovered] = useState<string | null>(null);
+  const [boxes, setBoxes] = useState<Record<string, BBox>>({});
+  const pathRefs = useRef<Record<string, SVGPathElement | null>>({});
   const selectedState = selected ? getStateByCode(selected) : null;
+
+  // getBBox() solo existe en el DOM real, y solo da valores correctos una
+  // vez que los <path> ya se pintaron — de ahí calculamos dónde centrar la
+  // inicial y el tooltip de cada estado, en vez de tratar de adivinar 50
+  // centroides a mano a partir de la data del path.
+  useEffect(() => {
+    const measureBoxes = (): void => {
+      const next: Record<string, BBox> = {};
+      for (const state of STATE_PATHS) {
+        const el = pathRefs.current[state.code];
+        if (!el) continue;
+        const box = el.getBBox();
+        next[state.code] = {
+          cx: box.x + box.width / 2,
+          cy: box.y + box.height / 2,
+          w: box.width,
+          h: box.height,
+        };
+      }
+      setBoxes(next);
+    };
+    measureBoxes();
+  }, []);
+
+  const tooltipCode = selected ?? hovered;
+  const tooltipBox = tooltipCode ? boxes[tooltipCode] : undefined;
+  const tooltipName = tooltipCode ? getStateByCode(tooltipCode)?.name : undefined;
 
   return (
     <div className="flex flex-1 min-h-0 flex-col gap-3">
@@ -239,45 +301,47 @@ export function UsStatesMap({ onSelect }: UsStatesMapProps) {
           aria-label="Mapa de Estados Unidos — tocá tu estado"
         >
           {STATE_PATHS.map((state) => {
-            const info = getStateByCode(state.code);
             const isSelected = selected === state.code;
+            const box = boxes[state.code];
+            const showLabel = box && box.w >= MIN_LABEL_SIZE && box.h >= MIN_LABEL_SIZE;
             return (
-              <path
-                key={state.code}
-                d={state.d}
-                onClick={() => setSelected(state.code)}
-                strokeWidth={1}
-                className={`cursor-pointer stroke-border-card transition-colors ${
-                  isSelected ? "fill-gold-primary" : "fill-bg-surface hover:fill-gold-subtle"
-                }`}
-              >
-                <title>{info?.name ?? state.code}</title>
-              </path>
+              <g key={state.code}>
+                <path
+                  ref={(el) => {
+                    pathRefs.current[state.code] = el;
+                  }}
+                  d={state.d}
+                  aria-label={getStateByCode(state.code)?.name ?? state.code}
+                  onClick={() => setSelected(state.code)}
+                  onMouseEnter={() => setHovered(state.code)}
+                  onMouseLeave={() => setHovered(null)}
+                  strokeWidth={1}
+                  className={`cursor-pointer stroke-border-card transition-colors ${
+                    isSelected ? "fill-gold-primary" : "fill-bg-surface hover:fill-gold-subtle"
+                  }`}
+                />
+                {showLabel && (
+                  <text
+                    x={box.cx}
+                    y={box.cy}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fontSize={11}
+                    fontWeight={600}
+                    className={`pointer-events-none select-none ${
+                      isSelected ? "fill-text-inverse" : "fill-text-secondary"
+                    }`}
+                  >
+                    {state.code}
+                  </text>
+                )}
+              </g>
             );
           })}
+          {tooltipCode && tooltipBox && tooltipName && (
+            <StateTooltip x={tooltipBox.cx} y={tooltipBox.cy} label={tooltipName} />
+          )}
         </svg>
-      </div>
-
-      <div className="flex flex-wrap justify-center gap-2">
-        {EXTRA_STATE_CODES.map((code) => {
-          const info = getStateByCode(code);
-          if (!info) return null;
-          const isSelected = selected === code;
-          return (
-            <button
-              key={code}
-              type="button"
-              onClick={() => setSelected(code)}
-              className={`rounded-lg border px-3 py-1.5 type-label ${
-                isSelected
-                  ? "border-gold-primary bg-gold-primary text-text-inverse"
-                  : "border-border-card bg-bg-surface text-text-primary"
-              }`}
-            >
-              {info.name}
-            </button>
-          );
-        })}
       </div>
 
       <div className="flex items-center justify-center rounded-xl border border-gold-border bg-gold-subtle px-4 py-2.5 min-h-[44px]">
