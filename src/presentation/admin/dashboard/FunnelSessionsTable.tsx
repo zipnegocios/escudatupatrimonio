@@ -2,19 +2,12 @@
 
 import { useState } from "react";
 import type { FunnelSessionDetail } from "@/core/use-cases/dashboard/list-funnel-sessions";
+import { formatDuration } from "@/presentation/admin/dashboard/format-duration";
 import { IconChevronRight, IconUsers } from "@/presentation/admin/icons";
 import { Badge, type BadgeTone } from "@/presentation/admin/ui/Badge";
 import { EmptyState } from "@/presentation/admin/ui/EmptyState";
 
 const MAX_VISIBLE = 100;
-
-export function formatDuration(ms: number | null): string {
-  if (ms === null) return "—";
-  const totalSeconds = Math.round(ms / 1000);
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-  return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
-}
 
 function statusFor(session: FunnelSessionDetail): { label: string; tone: BadgeTone } {
   if (session.completed) return { label: "Completó", tone: "success" };

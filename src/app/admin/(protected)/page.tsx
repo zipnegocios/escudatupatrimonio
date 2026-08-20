@@ -14,7 +14,8 @@ import {
 } from "@/presentation/admin/icons";
 import { BarChart } from "@/presentation/admin/dashboard/charts/BarChart";
 import { FunnelChart } from "@/presentation/admin/dashboard/charts/FunnelChart";
-import { formatDuration, FunnelSessionsTable } from "@/presentation/admin/dashboard/FunnelSessionsTable";
+import { formatDuration } from "@/presentation/admin/dashboard/format-duration";
+import { FunnelSessionsTable } from "@/presentation/admin/dashboard/FunnelSessionsTable";
 import { RangeFilter } from "@/presentation/admin/dashboard/RangeFilter";
 import { UpcomingAppointments } from "@/presentation/admin/dashboard/UpcomingAppointments";
 import { Card } from "@/presentation/admin/ui/Card";
