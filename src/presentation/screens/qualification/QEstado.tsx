@@ -25,7 +25,7 @@ export function QEstado({ onChoice }: ScreenComponentProps) {
         <p className="type-caption">Cada estado tiene diferentes opciones y regulaciones</p>
         <h1 className="type-title">¿En qué estado de EE.UU. resides actualmente?</h1>
       </div>
-      <div className="flex-1 min-h-0 overflow-y-auto flex items-start justify-center pb-4">
+      <div className="flex-1 min-h-0 flex flex-col pb-4">
         <UsStatesMap onSelect={onChoice} />
       </div>
     </ScreenWrapper>
