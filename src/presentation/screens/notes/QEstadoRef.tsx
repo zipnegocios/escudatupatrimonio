@@ -1,6 +1,7 @@
 "use client";
 
 import { NoteScreen } from "@/presentation/screens/notes/NoteScreen";
+import { locationPulseScene } from "@/presentation/webgl/scenes/locationPulse";
 import { SCREEN_REGISTRY } from "@/core/use-cases/screen-registry";
 import { getStateByCode } from "@/core/entities/us-states";
 import type { ScreenComponentProps } from "@/presentation/screens/screen-registry";
@@ -14,6 +15,7 @@ export function QEstadoRef({ vars, onChoice }: ScreenComponentProps) {
       text={`Estamos coordinando cobertura en ${stateName}. Te conectaremos con un Agente Certificado disponible en tu área para que recibas la misma atención personalizada.`}
       minDurationMs={meta.minDurationMs!}
       tapAdvanceAfterMs={meta.tapAdvanceAfterMs}
+      sceneSetup={locationPulseScene}
       onAdvance={() => onChoice("ADVANCE")}
     />
   );

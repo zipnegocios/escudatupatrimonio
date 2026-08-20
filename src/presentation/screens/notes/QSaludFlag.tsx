@@ -1,6 +1,7 @@
 "use client";
 
 import { NoteScreen } from "@/presentation/screens/notes/NoteScreen";
+import { medicalCrossScene } from "@/presentation/webgl/scenes/medicalCross";
 import { SCREEN_REGISTRY } from "@/core/use-cases/screen-registry";
 import type { ScreenComponentProps } from "@/presentation/screens/screen-registry";
 import type { SaludFlag } from "@/core/entities/qualification-profile";
@@ -21,6 +22,7 @@ export function QSaludFlag({ vars, onChoice }: ScreenComponentProps) {
       text={TEXT_BY_FLAG[vars.saludFlag ?? "MENOR"]}
       minDurationMs={meta.minDurationMs!}
       tapAdvanceAfterMs={meta.tapAdvanceAfterMs}
+      sceneSetup={medicalCrossScene}
       onAdvance={() => onChoice("ADVANCE")}
     />
   );

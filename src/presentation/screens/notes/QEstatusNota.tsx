@@ -1,6 +1,7 @@
 "use client";
 
 import { NoteScreen } from "@/presentation/screens/notes/NoteScreen";
+import { dataStreamScene } from "@/presentation/webgl/scenes/dataStream";
 import { SCREEN_REGISTRY } from "@/core/use-cases/screen-registry";
 import type { ScreenComponentProps } from "@/presentation/screens/screen-registry";
 import type { EstatusFlag } from "@/core/entities/qualification-profile";
@@ -19,6 +20,7 @@ export function QEstatusNota({ vars, onChoice }: ScreenComponentProps) {
       text={TEXT_BY_FLAG[vars.estatusFlag ?? "EN_PROCESO"]}
       minDurationMs={meta.minDurationMs!}
       tapAdvanceAfterMs={meta.tapAdvanceAfterMs}
+      sceneSetup={dataStreamScene}
       onAdvance={() => onChoice("ADVANCE")}
     />
   );

@@ -45,7 +45,7 @@ export function InfoNlg({ onChoice }: ScreenComponentProps) {
           compañías puede desaparecer ni dejar de pagar.
         </p>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={MIB_LOGO_URL} alt="MIB — Medical Information Bureau" className="h-8 w-auto" loading="lazy" />
+        <img src={MIB_LOGO_URL} alt="MIB — Medical Information Bureau" className="h-8 w-auto self-start" loading="lazy" />
       </div>
       <div className="pb-6">
         <CTAButton label="Entendido, continuemos →" onClick={() => onChoice("CONTINUE")} />

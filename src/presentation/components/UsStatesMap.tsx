@@ -253,6 +253,10 @@ function StateTooltip({ x, y, label }: { x: number; y: number; label: string }) 
   );
 }
 
+const MIN_ZOOM = 1;
+const MAX_ZOOM = 4;
+const ZOOM_BUTTON_STEP = 0.6;
+
 interface UsStatesMapProps {
   onSelect: (code: string) => void;
 }
@@ -261,8 +265,71 @@ export function UsStatesMap({ onSelect }: UsStatesMapProps) {
   const [selected, setSelected] = useState<string | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
   const [boxes, setBoxes] = useState<Record<string, BBox>>({});
+  const [zoom, setZoom] = useState(1);
   const pathRefs = useRef<Record<string, SVGPathElement | null>>({});
+  const scrollRef = useRef<HTMLDivElement>(null);
+  // Espeja `zoom` para que los listeners nativos de abajo (registrados una
+  // sola vez) siempre lean el valor actual sin tener que volver a
+  // suscribirse en cada tick de un gesto de pellizco — evitaría
+  // add/removeEventListener decenas de veces por segundo mientras alguien
+  // pellizca la pantalla.
+  const zoomRef = useRef(1);
+  const pinchRef = useRef<{ distance: number; zoom: number } | null>(null);
   const selectedState = selected ? getStateByCode(selected) : null;
+
+  useEffect(() => {
+    zoomRef.current = zoom;
+  }, [zoom]);
+
+  const clampZoom = (value: number): number => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, value));
+
+  // Rueda del mouse / pellizco de trackpad y pellizco táctil de dos dedos —
+  // ambos necesitan un listener nativo con { passive: false } para poder
+  // cancelar el scroll/zoom por defecto del navegador; el onWheel/onTouchMove
+  // sintéticos de React son pasivos y no dejan hacer preventDefault().
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+
+    const handleWheel = (event: WheelEvent): void => {
+      event.preventDefault();
+      setZoom((current) => clampZoom(current - event.deltaY * 0.0015));
+    };
+
+    const pinchDistance = (touches: TouchList): number => {
+      const [a, b] = [touches[0], touches[1]];
+      return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+    };
+
+    const handleTouchStart = (event: TouchEvent): void => {
+      if (event.touches.length === 2) {
+        pinchRef.current = { distance: pinchDistance(event.touches), zoom: zoomRef.current };
+      }
+    };
+
+    const handleTouchMove = (event: TouchEvent): void => {
+      if (event.touches.length === 2 && pinchRef.current) {
+        event.preventDefault();
+        const ratio = pinchDistance(event.touches) / pinchRef.current.distance;
+        setZoom(clampZoom(pinchRef.current.zoom * ratio));
+      }
+    };
+
+    const handleTouchEnd = (event: TouchEvent): void => {
+      if (event.touches.length < 2) pinchRef.current = null;
+    };
+
+    container.addEventListener("wheel", handleWheel, { passive: false });
+    container.addEventListener("touchstart", handleTouchStart, { passive: true });
+    container.addEventListener("touchmove", handleTouchMove, { passive: false });
+    container.addEventListener("touchend", handleTouchEnd);
+    return () => {
+      container.removeEventListener("wheel", handleWheel);
+      container.removeEventListener("touchstart", handleTouchStart);
+      container.removeEventListener("touchmove", handleTouchMove);
+      container.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, []);
 
   // getBBox() solo existe en el DOM real, y solo da valores correctos una
   // vez que los <path> ya se pintaron — de ahí calculamos dónde centrar la
@@ -293,13 +360,18 @@ export function UsStatesMap({ onSelect }: UsStatesMapProps) {
 
   return (
     <div className="flex flex-1 min-h-0 flex-col gap-3">
-      <div className="flex-1 min-h-0 overflow-auto rounded-xl border border-border-card bg-bg-elevated">
-        <svg
-          viewBox="174 100 959 593"
-          className="w-full min-w-[520px]"
-          role="img"
-          aria-label="Mapa de Estados Unidos — tocá tu estado"
+      <div className="relative flex-1 min-h-0">
+        <div
+          ref={scrollRef}
+          className="h-full w-full overflow-auto rounded-xl border border-border-card bg-bg-elevated"
         >
+          <svg
+            viewBox="174 100 959 593"
+            className="w-full min-w-[520px]"
+            style={{ transform: `scale(${zoom})`, transformOrigin: "50% 50%" }}
+            role="img"
+            aria-label="Mapa de Estados Unidos — tocá tu estado. Con dos dedos o la rueda del mouse podés ampliar."
+          >
           {STATE_PATHS.map((state) => {
             const isSelected = selected === state.code;
             const box = boxes[state.code];
@@ -341,7 +413,30 @@ export function UsStatesMap({ onSelect }: UsStatesMapProps) {
           {tooltipCode && tooltipBox && tooltipName && (
             <StateTooltip x={tooltipBox.cx} y={tooltipBox.cy} label={tooltipName} />
           )}
-        </svg>
+          </svg>
+        </div>
+
+        <div className="absolute right-3 top-3 flex flex-col overflow-hidden rounded-lg border border-border-card bg-bg-surface shadow-sm">
+          <button
+            type="button"
+            onClick={() => setZoom((z) => Math.min(MAX_ZOOM, z + ZOOM_BUTTON_STEP))}
+            disabled={zoom >= MAX_ZOOM}
+            aria-label="Ampliar mapa"
+            className="flex h-9 w-9 cursor-pointer items-center justify-center text-lg font-semibold text-text-secondary hover:bg-bg-elevated disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            +
+          </button>
+          <div className="h-px bg-border-card" />
+          <button
+            type="button"
+            onClick={() => setZoom((z) => Math.max(MIN_ZOOM, z - ZOOM_BUTTON_STEP))}
+            disabled={zoom <= MIN_ZOOM}
+            aria-label="Reducir mapa"
+            className="flex h-9 w-9 cursor-pointer items-center justify-center text-lg font-semibold text-text-secondary hover:bg-bg-elevated disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            −
+          </button>
+        </div>
       </div>
 
       <div className="flex items-center justify-center rounded-xl border border-gold-border bg-gold-subtle px-4 py-2.5 min-h-[44px]">
