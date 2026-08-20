@@ -19,4 +19,9 @@ export interface FunnelEventRepository {
   // hace falta filtrar por defecto. Agrega en SQL (GROUP BY), nunca trae
   // todas las filas a Node: es una tabla de escritura pública sin auth.
   countByScreen(range?: { from: Date; to: Date }): Promise<FunnelScreenCount[]>;
+  // Filas crudas de las sesiones cuyo primer evento cae en el rango — para
+  // reconstruir, por sesión, cuánto tiempo pasó en cada pantalla (delta entre
+  // timestamps consecutivos). A diferencia de countByScreen, acá sí hace
+  // falta traer filas: el detalle por sesión es inherente al feature.
+  listSessionsInRange(range: { from: Date; to: Date }): Promise<FunnelEventRow[]>;
 }

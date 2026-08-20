@@ -22,17 +22,17 @@ export interface UpcomingAppointment {
 }
 
 export interface DashboardSummary {
+  // Histórico completo, no reacciona al filtro de rango — es el contador
+  // ancla de la home ("cuántos leads hay en total, sin importar cuándo").
   totalLeads: number;
-  leadsToday: number;
-  leadsThisWeek: number;
-  leadsThisMonth: number;
-  leadsThisYear: number;
+  leadsInRange: number;
   statusBreakdown: StatusCount[];
   leadsPerDay: DayCount[];
+  // Ventana propia (próximos 7 días desde ahora), no el rango histórico
+  // seleccionado — no tiene sentido "filtrar hacia el pasado" la agenda futura.
   upcomingAppointments: UpcomingAppointment[];
 }
 
-const LEADS_PER_DAY_WINDOW = 14;
 const UPCOMING_APPOINTMENTS_WINDOW_DAYS = 7;
 
 // Clave de día en hora local del proceso (no UTC) — evita que un lead creado
@@ -46,12 +46,11 @@ function dateKey(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-export async function getDashboardSummary(deps: GetDashboardSummaryDeps): Promise<DashboardSummary> {
+export async function getDashboardSummary(
+  deps: GetDashboardSummaryDeps,
+  range: { from: Date; to: Date },
+): Promise<DashboardSummary> {
   const now = new Date();
-  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const startOfWeek = new Date(startOfToday.getTime() - 6 * 24 * 60 * 60 * 1000);
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const startOfYear = new Date(now.getFullYear(), 0, 1);
 
   const [leads, appointments] = await Promise.all([
     deps.leadRepository.list(),
@@ -67,22 +66,26 @@ export async function getDashboardSummary(deps: GetDashboardSummaryDeps): Promis
     leadName: leadNameById.get(appointment.leadId) ?? null,
   }));
 
-  const countSince = (since: Date): number =>
-    leads.filter((lead: Lead) => lead.createdAt >= since).length;
+  const leadsInRange = leads.filter(
+    (lead: Lead) => lead.createdAt >= range.from && lead.createdAt <= range.to,
+  );
 
   const statusCounts = new Map<string, number>();
-  for (const lead of leads) {
+  for (const lead of leadsInRange) {
     statusCounts.set(lead.status, (statusCounts.get(lead.status) ?? 0) + 1);
   }
 
   const dayCounts = new Map<string, number>();
-  const windowStart = new Date(startOfToday.getTime() - (LEADS_PER_DAY_WINDOW - 1) * 24 * 60 * 60 * 1000);
-  for (let i = 0; i < LEADS_PER_DAY_WINDOW; i++) {
-    const day = new Date(windowStart.getTime() + i * 24 * 60 * 60 * 1000);
+  const rangeStartDay = new Date(range.from.getFullYear(), range.from.getMonth(), range.from.getDate());
+  const rangeEndDay = new Date(range.to.getFullYear(), range.to.getMonth(), range.to.getDate());
+  for (
+    let day = new Date(rangeStartDay);
+    day.getTime() <= rangeEndDay.getTime();
+    day.setDate(day.getDate() + 1)
+  ) {
     dayCounts.set(dateKey(day), 0);
   }
-  for (const lead of leads) {
-    if (lead.createdAt < windowStart) continue;
+  for (const lead of leadsInRange) {
     const key = dateKey(lead.createdAt);
     if (dayCounts.has(key)) {
       dayCounts.set(key, (dayCounts.get(key) ?? 0) + 1);
@@ -91,10 +94,7 @@ export async function getDashboardSummary(deps: GetDashboardSummaryDeps): Promis
 
   return {
     totalLeads: leads.length,
-    leadsToday: countSince(startOfToday),
-    leadsThisWeek: countSince(startOfWeek),
-    leadsThisMonth: countSince(startOfMonth),
-    leadsThisYear: countSince(startOfYear),
+    leadsInRange: leadsInRange.length,
     statusBreakdown: Array.from(statusCounts.entries()).map(([status, count]) => ({ status, count })),
     leadsPerDay: Array.from(dayCounts.entries()).map(([date, count]) => ({ date, count })),
     upcomingAppointments,

@@ -28,8 +28,11 @@ export interface FunnelSummary {
   silentDropoff: number;
 }
 
-export async function getFunnelSummary(deps: GetFunnelSummaryDeps): Promise<FunnelSummary> {
-  const byScreen = await deps.funnelEventRepository.countByScreen();
+export async function getFunnelSummary(
+  deps: GetFunnelSummaryDeps,
+  range: { from: Date; to: Date },
+): Promise<FunnelSummary> {
+  const byScreen = await deps.funnelEventRepository.countByScreen(range);
   const countFor = (screenId: string): number =>
     byScreen.find((row) => row.screenId === screenId)?.sessionCount ?? 0;
 
