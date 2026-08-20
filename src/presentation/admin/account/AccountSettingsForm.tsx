@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Card } from "@/presentation/admin/ui/Card";
 
 interface AccountUser {
   username: string;
@@ -95,10 +96,8 @@ export function AccountSettingsForm({ user }: { user: AccountUser }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="rounded-xl border border-border-card bg-bg-surface p-4">
-        <h2 className="text-sm font-semibold text-text-primary">Perfil</h2>
-
-        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <Card title="Perfil">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
             <label className="type-caption mb-1 block">Usuario</label>
             <input
@@ -129,25 +128,24 @@ export function AccountSettingsForm({ user }: { user: AccountUser }) {
         </div>
 
         {profileError && <p className="mt-2 text-sm text-caution">{profileError}</p>}
-        {profileSuccess && <p className="mt-2 text-sm text-text-secondary">Guardado.</p>}
+        {profileSuccess && <p className="mt-2 text-sm text-success">Guardado.</p>}
 
         <button
           type="button"
           onClick={handleSaveProfile}
           disabled={savingProfile}
-          className="mt-4 rounded-lg bg-bg-primary px-4 py-2 text-sm text-text-primary disabled:opacity-60"
+          className="mt-4 cursor-pointer rounded-lg bg-trust px-4 py-2 text-sm font-medium text-white hover:bg-trust-dark disabled:opacity-60"
         >
           {savingProfile ? "Guardando…" : "Guardar cambios"}
         </button>
-      </div>
+      </Card>
 
-      <div className="rounded-xl border border-border-card bg-bg-surface p-4">
-        <h2 className="text-sm font-semibold text-text-primary">Cambiar contraseña</h2>
-        <p className="mt-1 text-sm text-text-secondary">
+      <Card title="Cambiar contraseña">
+        <p className="-mt-1 mb-3 text-sm text-text-secondary">
           Al cambiarla, se cierran todas tus demás sesiones activas.
         </p>
 
-        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="sm:col-span-2">
             <label className="type-caption mb-1 block">Contraseña actual</label>
             <input
@@ -179,18 +177,18 @@ export function AccountSettingsForm({ user }: { user: AccountUser }) {
 
         {passwordError && <p className="mt-2 text-sm text-caution">{passwordError}</p>}
         {passwordSuccess && (
-          <p className="mt-2 text-sm text-text-secondary">Contraseña actualizada.</p>
+          <p className="mt-2 text-sm text-success">Contraseña actualizada.</p>
         )}
 
         <button
           type="button"
           onClick={handleChangePassword}
           disabled={savingPassword}
-          className="mt-4 rounded-lg bg-bg-primary px-4 py-2 text-sm text-text-primary disabled:opacity-60"
+          className="mt-4 cursor-pointer rounded-lg bg-trust px-4 py-2 text-sm font-medium text-white hover:bg-trust-dark disabled:opacity-60"
         >
           {savingPassword ? "Guardando…" : "Cambiar contraseña"}
         </button>
-      </div>
+      </Card>
     </div>
   );
 }

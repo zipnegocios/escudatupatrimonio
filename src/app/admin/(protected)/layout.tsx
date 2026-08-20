@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { currentUser } from "@/infrastructure/auth/current-user";
-import { AdminHeader } from "@/presentation/admin/AdminHeader";
+import { AdminNav } from "@/presentation/admin/AdminNav";
 
 /**
  * Portón de auth REAL (el proxy solo hace un chequeo optimista de cookie).
@@ -18,10 +18,10 @@ export default async function AdminProtectedLayout({ children }: { children: Rea
   // globals.css pone overflow:hidden y user-select:none en el body para el
   // wizard; el admin necesita scrollear y poder seleccionar texto.
   return (
-    <div className="flex h-full select-text flex-col bg-bg-primary">
-      <AdminHeader name={user.displayName ?? user.username} />
-      <main className="mx-auto min-h-0 w-full max-w-5xl flex-1 overflow-y-auto px-4 py-8">
-        {children}
+    <div className="flex h-full select-text flex-col bg-bg-primary md:flex-row">
+      <AdminNav name={user.displayName ?? user.username} />
+      <main className="min-h-0 w-full flex-1 overflow-y-auto px-4 py-8">
+        <div className="mx-auto max-w-7xl">{children}</div>
       </main>
     </div>
   );

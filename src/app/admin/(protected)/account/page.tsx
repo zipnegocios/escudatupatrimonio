@@ -13,7 +13,7 @@ export default async function AdminAccountPage() {
       <p className="mt-1 text-sm text-text-secondary">
         Editá tus datos de acceso al panel — quedan guardados en la base de datos.
       </p>
-      <div className="mt-4">
+      <div className="mt-6">
         <AccountSettingsForm
           user={{ username: user.username, email: user.email, displayName: user.displayName }}
         />

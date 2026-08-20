@@ -36,6 +36,7 @@
   --success: #17824f;
   --success-bg: rgba(23, 130, 79, 0.12);
   --trust-blue: #2563a8;
+  --trust-blue-dark: #1d4d85;
   --trust-bg: rgba(37, 99, 168, 0.1);
   --caution: #8a5c0c;
   --caution-bg: rgba(138, 92, 12, 0.12);
@@ -93,6 +94,7 @@
   --color-success: var(--success);
   --color-success-bg: var(--success-bg);
   --color-trust: var(--trust-blue);
+  --color-trust-dark: var(--trust-blue-dark);
   --color-trust-bg: var(--trust-bg);
   --color-caution: var(--caution);
   --color-caution-bg: var(--caution-bg);

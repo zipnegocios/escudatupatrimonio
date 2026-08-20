@@ -1,9 +1,12 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { leadRepository } from "@/infrastructure/container";
+import { IconCaretLeft } from "@/presentation/admin/icons";
+import { LEAD_STATUS_LABEL, LEAD_STATUS_TONE } from "@/presentation/admin/leads/lead-labels";
 import { LeadContactForm } from "@/presentation/admin/leads/LeadContactForm";
 import { LeadProfileForm } from "@/presentation/admin/leads/LeadProfileForm";
 import { LeadWhatsAppActions } from "@/presentation/admin/leads/LeadWhatsAppActions";
+import { Badge } from "@/presentation/admin/ui/Badge";
 
 export default async function AdminLeadDetailPage({
   params,
@@ -20,15 +23,22 @@ export default async function AdminLeadDetailPage({
 
   return (
     <section>
-      <Link href="/admin/leads" className="text-sm text-text-secondary underline">
-        ← Volver a leads
+      <Link
+        href="/admin/leads"
+        className="flex items-center gap-1 text-sm text-text-secondary hover:text-text-primary"
+      >
+        <IconCaretLeft size={16} />
+        Volver a leads
       </Link>
 
-      <h1 className="mt-3 text-2xl font-semibold text-text-primary">
-        {lead.nombre ?? "(sin nombre)"}
-      </h1>
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        <h1 className="text-2xl font-semibold text-text-primary">{lead.nombre ?? "(sin nombre)"}</h1>
+        <Badge tone={LEAD_STATUS_TONE[lead.status] ?? "neutral"}>
+          {LEAD_STATUS_LABEL[lead.status] ?? lead.status}
+        </Badge>
+      </div>
       <p className="mt-1 text-sm text-text-secondary">
-        {lead.telefono ?? "sin teléfono"} · {lead.canal ?? "sin canal"} · estado {lead.status}
+        {lead.telefono ?? "sin teléfono"} · {lead.canal ?? "sin canal"}
       </p>
 
       <LeadWhatsAppActions leadId={lead.id} telefono={lead.telefono} />
@@ -36,17 +46,14 @@ export default async function AdminLeadDetailPage({
       {profile && profile.tags.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-2">
           {profile.tags.map((tag) => (
-            <span
-              key={tag}
-              className="rounded-full bg-bg-surface px-2 py-1 text-xs text-text-secondary"
-            >
+            <Badge key={tag} tone="neutral">
               {tag}
-            </span>
+            </Badge>
           ))}
         </div>
       )}
 
-      <div className="mt-6">
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
         <LeadContactForm
           leadId={lead.id}
           lead={{
@@ -57,33 +64,33 @@ export default async function AdminLeadDetailPage({
             status: lead.status,
           }}
         />
-      </div>
 
-      {profile && (
-        <LeadProfileForm
-          leadId={lead.id}
-          profile={{
-            intencionP: profile.intencionP,
-            intencionS: profile.intencionS,
-            horizonte: profile.horizonte,
-            planRetiro: profile.planRetiro,
-            familiaTipo: profile.familiaTipo,
-            preocFamilia: profile.preocFamilia,
-            cobActual: profile.cobActual,
-            preocSalud: profile.preocSalud,
-            edadRango: profile.edadRango,
-            edadCond: profile.edadCond,
-            salud: profile.salud,
-            saludFlag: profile.saludFlag,
-            estatus: profile.estatus,
-            estatusFlag: profile.estatusFlag,
-            estado: profile.estado,
-            timezone: profile.timezone,
-            referido: profile.referido,
-            ventanaDisp: profile.ventanaDisp,
-          }}
-        />
-      )}
+        {profile && (
+          <LeadProfileForm
+            leadId={lead.id}
+            profile={{
+              intencionP: profile.intencionP,
+              intencionS: profile.intencionS,
+              horizonte: profile.horizonte,
+              planRetiro: profile.planRetiro,
+              familiaTipo: profile.familiaTipo,
+              preocFamilia: profile.preocFamilia,
+              cobActual: profile.cobActual,
+              preocSalud: profile.preocSalud,
+              edadRango: profile.edadRango,
+              edadCond: profile.edadCond,
+              salud: profile.salud,
+              saludFlag: profile.saludFlag,
+              estatus: profile.estatus,
+              estatusFlag: profile.estatusFlag,
+              estado: profile.estado,
+              timezone: profile.timezone,
+              referido: profile.referido,
+              ventanaDisp: profile.ventanaDisp,
+            }}
+          />
+        )}
+      </div>
     </section>
   );
 }

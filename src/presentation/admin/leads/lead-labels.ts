@@ -1,3 +1,5 @@
+import type { BadgeTone } from "@/presentation/admin/ui/Badge";
+
 // Etiquetas en español para cada variable de QualificationProfile — el
 // mismo diccionario alimenta el <select> de edición y la vista de lectura.
 export const INTENCION_LABEL: Record<string, string> = {
@@ -100,4 +102,14 @@ export const LEAD_STATUS_LABEL: Record<string, string> = {
   DISQUALIFIED: "Descalificado",
   CLOSED_WON: "Cerrado ganado",
   CLOSED_LOST: "Cerrado perdido",
+};
+
+export const LEAD_STATUS_TONE: Record<string, BadgeTone> = {
+  NEW: "trust",
+  CONTACTED: "gold",
+  SCHEDULED: "trust",
+  QUALIFIED: "success",
+  DISQUALIFIED: "neutral",
+  CLOSED_WON: "success",
+  CLOSED_LOST: "caution",
 };

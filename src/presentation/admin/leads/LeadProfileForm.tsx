@@ -16,6 +16,7 @@ import {
   SALUD_FLAG_LABEL,
   SALUD_LABEL,
 } from "@/presentation/admin/leads/lead-labels";
+import { Card } from "@/presentation/admin/ui/Card";
 
 interface ProfileFields {
   intencionP: string | null;
@@ -158,13 +159,12 @@ export function LeadProfileForm({
   };
 
   return (
-    <div className="mt-6 rounded-xl border border-border-card bg-bg-surface p-4">
-      <h2 className="text-sm font-semibold text-text-primary">Perfil de calificación</h2>
-      <p className="mt-1 text-sm text-text-secondary">
+    <Card title="Perfil de calificación">
+      <p className="-mt-1 mb-3 text-sm text-text-secondary">
         Las respuestas completas del Smart Form — todo editable a mano si hace falta corregir algo.
       </p>
 
-      <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <EnumField label="Intención principal" value={fields.intencionP} onChange={set("intencionP")} options={INTENCION_LABEL} />
         <EnumField label="Intención secundaria" value={fields.intencionS} onChange={set("intencionS")} options={INTENCION_LABEL} />
         <EnumField label="Horizonte" value={fields.horizonte} onChange={set("horizonte")} options={HORIZONTE_LABEL} />
@@ -192,16 +192,16 @@ export function LeadProfileForm({
         </label>
       </div>
 
-      {saved && <p className="mt-2 text-sm text-text-secondary">Guardado.</p>}
+      {saved && <p className="mt-2 text-sm text-success">Guardado.</p>}
 
       <button
         type="button"
         onClick={handleSave}
         disabled={saving}
-        className="mt-4 rounded-lg bg-bg-primary px-4 py-2 text-sm text-text-primary disabled:opacity-60"
+        className="mt-4 cursor-pointer rounded-lg bg-trust px-4 py-2 text-sm font-medium text-white hover:bg-trust-dark disabled:opacity-60"
       >
         {saving ? "Guardando…" : "Guardar perfil"}
       </button>
-    </div>
+    </Card>
   );
 }

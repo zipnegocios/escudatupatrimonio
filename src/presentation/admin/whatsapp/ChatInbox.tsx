@@ -15,7 +15,7 @@ import {
   IconTrash,
   IconUserPlus,
 } from "@/presentation/admin/icons";
-import { Avatar } from "@/presentation/admin/whatsapp/Avatar";
+import { Avatar } from "@/presentation/admin/ui/Avatar";
 
 interface Conversation {
   id: string;

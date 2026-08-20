@@ -64,6 +64,13 @@
       "when": 1787171154472,
       "tag": "0008_tiny_firestar",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1787185399821,
+      "tag": "0009_cloudy_shaman",
+      "breakpoints": true
     }
   ]
 }

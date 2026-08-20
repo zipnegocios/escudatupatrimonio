@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { CANAL_LABEL, LEAD_STATUS_LABEL, PRIORITY_LABEL } from "@/presentation/admin/leads/lead-labels";
+import { Card } from "@/presentation/admin/ui/Card";
 
 interface LeadContact {
   nombre: string | null;
@@ -43,10 +44,8 @@ export function LeadContactForm({ leadId, lead }: { leadId: string; lead: LeadCo
   };
 
   return (
-    <div className="rounded-xl border border-border-card bg-bg-surface p-4">
-      <h2 className="text-sm font-semibold text-text-primary">Datos de contacto</h2>
-
-      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+    <Card title="Datos de contacto">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
           <label className="type-caption mb-1 block">Nombre</label>
           <input
@@ -111,16 +110,16 @@ export function LeadContactForm({ leadId, lead }: { leadId: string; lead: LeadCo
         </div>
       </div>
 
-      {saved && <p className="mt-2 text-sm text-text-secondary">Guardado.</p>}
+      {saved && <p className="mt-2 text-sm text-success">Guardado.</p>}
 
       <button
         type="button"
         onClick={handleSave}
         disabled={saving}
-        className="mt-4 rounded-lg bg-bg-primary px-4 py-2 text-sm text-text-primary disabled:opacity-60"
+        className="mt-4 cursor-pointer rounded-lg bg-trust px-4 py-2 text-sm font-medium text-white hover:bg-trust-dark disabled:opacity-60"
       >
         {saving ? "Guardando…" : "Guardar contacto"}
       </button>
-    </div>
+    </Card>
   );
 }

@@ -1,5 +1,6 @@
 import {
   boolean,
+  index,
   integer,
   jsonb,
   pgTable,
@@ -264,6 +265,25 @@ export const appointments = pgTable("appointments", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+// Instrumentación del embudo del Smart Form — una fila por (sesión, pantalla
+// alcanzada). El unique constraint + onConflictDoNothing (ver el adaptador)
+// da idempotencia gratis: reintentos de red o el usuario yendo atrás/adelante
+// sobre la misma pantalla nunca duplican la fila.
+export const funnelEvents = pgTable(
+  "funnel_events",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    sessionId: text("session_id").notNull(),
+    screenId: text("screen_id").notNull(),
+    utmCampaign: text("utm_campaign"),
+    occurredAt: timestamp("occurred_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    unique().on(table.sessionId, table.screenId),
+    index("funnel_events_occurred_at_idx").on(table.occurredAt),
+  ],
+);
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 
@@ -296,3 +316,6 @@ export type NewEmailEventRow = typeof emailEvents.$inferInsert;
 
 export type AppointmentRow = typeof appointments.$inferSelect;
 export type NewAppointmentRow = typeof appointments.$inferInsert;
+
+export type FunnelEventRow = typeof funnelEvents.$inferSelect;
+export type NewFunnelEventRow = typeof funnelEvents.$inferInsert;

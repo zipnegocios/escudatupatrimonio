@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { IconMessageCircle, IconPhone } from "@/presentation/admin/icons";
 
 // Baileys (la librería que usamos para WhatsApp) no puede iniciar llamadas
 // de voz/video reales — WhatsApp usa un protocolo aparte para eso que
@@ -41,22 +42,25 @@ export function LeadWhatsAppActions({ leadId, telefono }: { leadId: string; tele
         type="button"
         onClick={handleWriteWhatsApp}
         disabled={starting}
-        className="rounded-lg bg-bg-primary px-3 py-1.5 text-sm text-text-primary disabled:opacity-60"
+        className="flex cursor-pointer items-center gap-1.5 rounded-lg bg-trust px-3 py-1.5 text-sm font-medium text-white hover:bg-trust-dark disabled:opacity-60"
       >
+        <IconMessageCircle size={16} />
         {starting ? "Abriendo…" : "Escribir por WhatsApp"}
       </button>
       <a
         href={`https://wa.me/${waDigits}`}
         target="_blank"
         rel="noreferrer"
-        className="rounded-lg border border-border-card px-3 py-1.5 text-sm text-text-secondary"
+        className="flex items-center gap-1.5 rounded-lg border border-border-card px-3 py-1.5 text-sm text-text-secondary hover:bg-bg-elevated"
       >
+        <IconPhone size={16} />
         Llamar por WhatsApp
       </a>
       <a
         href={`tel:+${waDigits}`}
-        className="rounded-lg border border-border-card px-3 py-1.5 text-sm text-text-secondary"
+        className="flex items-center gap-1.5 rounded-lg border border-border-card px-3 py-1.5 text-sm text-text-secondary hover:bg-bg-elevated"
       >
+        <IconPhone size={16} />
         Llamar (teléfono)
       </a>
       {error && <p className="w-full text-sm text-caution">{error}</p>}

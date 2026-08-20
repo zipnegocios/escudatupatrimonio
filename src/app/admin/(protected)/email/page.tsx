@@ -1,4 +1,9 @@
+import type { EmailLogRow } from "@/core/ports/email-log-repository";
 import { emailLogRepository } from "@/infrastructure/container";
+import { IconMail } from "@/presentation/admin/icons";
+import { Badge } from "@/presentation/admin/ui/Badge";
+import { DataTable, type DataTableColumn } from "@/presentation/admin/ui/DataTable";
+import { EmptyState } from "@/presentation/admin/ui/EmptyState";
 
 const STATUS_LABEL: Record<string, string> = {
   QUEUED: "En cola",
@@ -12,6 +17,48 @@ const STATUS_LABEL: Record<string, string> = {
   RECEIVED: "Recibido",
 };
 
+const STATUS_TONE: Record<string, "success" | "caution" | "trust" | "gold" | "neutral"> = {
+  QUEUED: "neutral",
+  SENT: "trust",
+  DELIVERED: "success",
+  OPENED: "success",
+  CLICKED: "success",
+  BOUNCED: "caution",
+  COMPLAINED: "caution",
+  FAILED: "caution",
+  RECEIVED: "gold",
+};
+
+const COLUMNS: DataTableColumn<EmailLogRow>[] = [
+  {
+    key: "direction",
+    label: "Dirección",
+    primary: true,
+    render: (email) => (
+      <span className="font-medium text-text-primary">
+        {email.direction === "OUTBOUND" ? "Enviado" : "Recibido"}
+      </span>
+    ),
+  },
+  { key: "fromAddress", label: "De", render: (email) => email.fromAddress },
+  { key: "toAddress", label: "Para", render: (email) => email.toAddress },
+  { key: "subject", label: "Asunto", render: (email) => email.subject ?? "(sin asunto)" },
+  {
+    key: "status",
+    label: "Estado",
+    render: (email) => (
+      <Badge tone={STATUS_TONE[email.status] ?? "neutral"}>
+        {STATUS_LABEL[email.status] ?? email.status}
+      </Badge>
+    ),
+  },
+  {
+    key: "occurredAt",
+    label: "Fecha",
+    render: (email) => new Date(email.occurredAt).toLocaleString("es-VE"),
+  },
+];
+
 export default async function AdminEmailPage() {
   const emails = await emailLogRepository.list();
 
@@ -23,44 +70,12 @@ export default async function AdminEmailPage() {
         (enviados y recibidos vía Resend).
       </p>
 
-      <div className="mt-6 overflow-x-auto rounded-xl border border-border-card">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-bg-surface text-text-secondary">
-            <tr>
-              <th className="px-4 py-3">Dirección</th>
-              <th className="px-4 py-3">De</th>
-              <th className="px-4 py-3">Para</th>
-              <th className="px-4 py-3">Asunto</th>
-              <th className="px-4 py-3">Estado</th>
-              <th className="px-4 py-3">Fecha</th>
-            </tr>
-          </thead>
-          <tbody>
-            {emails.map((email) => (
-              <tr key={email.id} className="border-t border-border-card">
-                <td className="px-4 py-3 text-text-secondary">
-                  {email.direction === "OUTBOUND" ? "Enviado" : "Recibido"}
-                </td>
-                <td className="px-4 py-3 text-text-secondary">{email.fromAddress}</td>
-                <td className="px-4 py-3 text-text-secondary">{email.toAddress}</td>
-                <td className="px-4 py-3 text-text-primary">{email.subject ?? "(sin asunto)"}</td>
-                <td className="px-4 py-3 text-text-secondary">
-                  {STATUS_LABEL[email.status] ?? email.status}
-                </td>
-                <td className="px-4 py-3 text-text-secondary">
-                  {new Date(email.occurredAt).toLocaleString("es-VE")}
-                </td>
-              </tr>
-            ))}
-            {emails.length === 0 && (
-              <tr>
-                <td colSpan={6} className="px-4 py-6 text-center text-text-secondary">
-                  Todavía no hay correos registrados.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+      <div className="mt-6">
+        {emails.length === 0 ? (
+          <EmptyState icon={<IconMail size={28} />} message="Todavía no hay correos registrados." />
+        ) : (
+          <DataTable columns={COLUMNS} rows={emails} />
+        )}
       </div>
     </section>
   );

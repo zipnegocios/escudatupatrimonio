@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFormStore } from "@/presentation/state/form-store";
 import { SCREEN_COMPONENTS } from "@/presentation/screens/screen-registry";
 import { BackButton } from "@/presentation/components/BackButton";
 import { ConfirmExitModal } from "@/presentation/components/ConfirmExitModal";
+import { trackScreenReached } from "@/presentation/state/funnel-tracking";
 
 /**
  * Shell del wizard: una sola ruta cliente que renderiza los 41 screens según
@@ -26,7 +27,17 @@ export function SmartFormApp() {
   const history = useFormStore((s) => s.history);
   const navigate = useFormStore((s) => s.navigate);
   const goBack = useFormStore((s) => s.goBack);
+  const sessionId = useFormStore((s) => s.sessionId);
+  const utmCampaign = useFormStore((s) => s.utmCampaign);
   const [confirmingExit, setConfirmingExit] = useState(false);
+
+  // Único punto de instrumentación del embudo de abandono: captura las 41
+  // pantallas (LANDING incluida, al montar) sin tocar ninguna pantalla
+  // individual ni la lógica de ruteo del store. DISP_CHECK nunca llega acá
+  // (form-store.ts la resuelve internamente antes de exponer currentScreen).
+  useEffect(() => {
+    trackScreenReached({ sessionId, screenId: currentScreen, utmCampaign });
+  }, [currentScreen, sessionId, utmCampaign]);
 
   const Screen = SCREEN_COMPONENTS[currentScreen];
   const previousScreen = history[history.length - 1];

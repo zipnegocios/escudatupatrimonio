@@ -153,3 +153,130 @@ export function IconUserPlus(props: { size?: number }) {
     </Base>
   );
 }
+
+export function IconHome(props: { size?: number }) {
+  return (
+    <Base size={props.size}>
+      <path d="M3 11l9-8 9 8" />
+      <path d="M5 10v10a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1V10" />
+    </Base>
+  );
+}
+
+export function IconUsers(props: { size?: number }) {
+  return (
+    <Base size={props.size}>
+      <circle cx="9" cy="8" r="4" />
+      <path d="M2 21a7 7 0 0114 0" />
+      <circle cx="17" cy="8" r="3" />
+      <path d="M22 21a6 6 0 00-4.5-8.7" />
+    </Base>
+  );
+}
+
+export function IconCalendarDays(props: { size?: number }) {
+  return (
+    <Base size={props.size}>
+      <rect x="3" y="5" width="18" height="16" rx="2" />
+      <path d="M3 10h18M8 3v4M16 3v4" />
+      <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01" />
+    </Base>
+  );
+}
+
+export function IconMail(props: { size?: number }) {
+  return (
+    <Base size={props.size}>
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="M3 6.5l9 6.5 9-6.5" />
+    </Base>
+  );
+}
+
+export function IconUserCircle(props: { size?: number }) {
+  return (
+    <Base size={props.size}>
+      <circle cx="12" cy="12" r="9" />
+      <circle cx="12" cy="10" r="3" />
+      <path d="M6.2 18.5a6 6 0 0111.6 0" />
+    </Base>
+  );
+}
+
+export function IconMessageCircle(props: { size?: number }) {
+  return (
+    <Base size={props.size}>
+      <path d="M21 12a8.5 8.5 0 01-12.4 7.6L3 21l1.4-5.6A8.5 8.5 0 1121 12z" />
+    </Base>
+  );
+}
+
+export function IconChartBar(props: { size?: number }) {
+  return (
+    <Base size={props.size}>
+      <path d="M4 21V10M12 21V4M20 21v-7" />
+      <path d="M2 21h20" />
+    </Base>
+  );
+}
+
+export function IconTrendingUp(props: { size?: number }) {
+  return (
+    <Base size={props.size}>
+      <path d="M3 17l6-6 4 4 8-8" />
+      <path d="M15 6h6v6" />
+    </Base>
+  );
+}
+
+export function IconMenu(props: { size?: number }) {
+  return (
+    <Base size={props.size}>
+      <path d="M4 6h16M4 12h16M4 18h16" />
+    </Base>
+  );
+}
+
+export function IconClose(props: { size?: number }) {
+  return (
+    <Base size={props.size}>
+      <path d="M6 6l12 12M18 6L6 18" />
+    </Base>
+  );
+}
+
+export function IconLogout(props: { size?: number }) {
+  return (
+    <Base size={props.size}>
+      <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+      <path d="M16 17l5-5-5-5" />
+      <path d="M21 12H9" />
+    </Base>
+  );
+}
+
+export function IconClock(props: { size?: number }) {
+  return (
+    <Base size={props.size}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3.5 2" />
+    </Base>
+  );
+}
+
+export function IconAlertTriangle(props: { size?: number }) {
+  return (
+    <Base size={props.size}>
+      <path d="M12 3l10 18H2L12 3z" />
+      <path d="M12 10v4M12 17.5h.01" />
+    </Base>
+  );
+}
+
+export function IconChevronRight(props: { size?: number }) {
+  return (
+    <Base size={props.size}>
+      <path d="M9 6l6 6-6 6" />
+    </Base>
+  );
+}

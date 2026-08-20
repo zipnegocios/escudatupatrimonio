@@ -23,7 +23,7 @@ export default async function AdminCalendarPage() {
         Agenda interna de citas — próximos 30 días.
       </p>
 
-      <div className="mt-4">
+      <div className="mt-6">
         <AppointmentForm
           leads={leads.map((lead) => ({
             id: lead.id,

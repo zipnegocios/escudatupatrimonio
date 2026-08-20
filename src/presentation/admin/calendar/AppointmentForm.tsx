@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Card } from "@/presentation/admin/ui/Card";
 
 interface LeadOption {
   id: string;
@@ -61,10 +62,8 @@ export function AppointmentForm({ leads }: { leads: LeadOption[] }) {
   };
 
   return (
-    <div className="rounded-xl border border-border-card bg-bg-surface p-4">
-      <h2 className="text-sm font-semibold text-text-primary">Nueva cita</h2>
-
-      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+    <Card title="Nueva cita">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
           <label className="type-caption mb-1 block">Lead</label>
           <select
@@ -120,13 +119,13 @@ export function AppointmentForm({ leads }: { leads: LeadOption[] }) {
         type="button"
         onClick={handleSubmit}
         disabled={submitting || leads.length === 0}
-        className="mt-4 rounded-lg bg-bg-primary px-4 py-2 text-sm text-text-primary disabled:opacity-60"
+        className="mt-4 cursor-pointer rounded-lg bg-trust px-4 py-2 text-sm font-medium text-white hover:bg-trust-dark disabled:opacity-60"
       >
         {submitting ? "Guardando…" : "Agendar"}
       </button>
       {leads.length === 0 && (
         <p className="mt-2 text-sm text-text-secondary">Todavía no hay leads para agendar.</p>
       )}
-    </div>
+    </Card>
   );
 }
