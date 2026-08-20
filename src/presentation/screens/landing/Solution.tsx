@@ -4,7 +4,7 @@ import { IconGrowth, IconUmbrella, IconHeart } from "@/presentation/components/i
 const PILARES = [
   {
     title: "Ahorro",
-    text: "Tu dinero crece con el tiempo, conectado a los mercados, sin exponerte a sus pérdidas.",
+    text: "Los planes de ahorro tradicionales dependen por completo del comportamiento del mercado. El IOL, en cambio, tiene un piso garantizado: tu dinero crece con el tiempo, conectado a los mercados, sin exponerte a sus pérdidas.",
     icon: IconGrowth,
   },
   {

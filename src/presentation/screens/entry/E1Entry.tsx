@@ -22,11 +22,12 @@ export function E1Entry({ onChoice }: ScreenComponentProps) {
         <p className="type-eyebrow">Evaluación de programas de ahorro y protección</p>
         <h1 className="type-title">Verifica si calificas</h1>
         <p className="type-body">
-          Este proceso toma aproximadamente 4 minutos. Solo necesitas tocar
-          botones — no hay que escribir.
+          Solo necesitas tocar botones — no hay que escribir.
         </p>
         <p className="type-caption">
-          Tu Número de Seguro Social NO se solicita en este formulario.
+          Vas a completar algunos datos personales, incluido tu Número de
+          Seguro Social — más adelante te explicamos exactamente para qué se
+          usa y cómo se protege.
         </p>
       </div>
       <div className="pb-6">

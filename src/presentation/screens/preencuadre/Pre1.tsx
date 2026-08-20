@@ -14,7 +14,7 @@ export function Pre1({ onChoice }: ScreenComponentProps) {
       title="Trabajamos con 9 aseguradoras líderes"
       paragraphs={[
         "Son aseguradoras reguladas, con décadas de trayectoria en Estados Unidos. El Estado audita constantemente sus reservas para garantizar que puedan cumplir cada promesa hecha a sus clientes.",
-        "La aprobación de tu póliza no la decide el agente — la decide la aseguradora que mejor se adapte a tu perfil, junto al MIB, después de revisar tu solicitud.",
+        "Tu perfil se revisa según el proceso federal de aprobación: el MIB (Buró Médico) verifica tu información, y se te asigna la aseguradora que mejor se adapte a tu caso.",
       ]}
       logos
       ctaLabel="Entendido →"

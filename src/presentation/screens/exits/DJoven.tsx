@@ -7,7 +7,8 @@ export function DJoven() {
   return (
     <ExitScreen
       title="Gracias por tu interés"
-      body="Este programa está diseñado para personas mayores de 18 años. Anotamos tu perfil y nos pondremos en contacto contigo cuando llegue el momento indicado."
+      body="Este programa está diseñado para personas mayores de 18 años. Si querés, podés escribirle directo a un agente para conversar qué otras opciones existen para tu caso."
+      whatsappReason="soy menor de 18 años"
     />
   );
 }

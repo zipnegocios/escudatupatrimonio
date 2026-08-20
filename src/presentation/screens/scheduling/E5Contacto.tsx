@@ -101,9 +101,10 @@ export function E5Contacto({ onChoice }: ScreenComponentProps) {
 
         {error && <p className="type-caption text-caution">{error}</p>}
 
-        <p className="type-caption opacity-70">
-          Tu información es confidencial. No la compartimos con terceros. Tu
-          Número de Seguro Social NO se solicita en este formulario.
+        <p className="type-body">
+          Tu información es confidencial y no la compartimos con terceros.
+          Los datos sensibles, incluido tu Número de Seguro Social, se
+          manejan de forma segura y encriptada.
         </p>
       </div>
 

@@ -1,6 +1,6 @@
 // copy: docs/superpowers/specs/2026-08-06-landing-page-design.md § 4. El proceso
 const PASOS = [
-  "Completas una breve evaluación (4 minutos)",
+  "Completas una breve evaluación",
   "Un Agente Certificado revisa tu perfil",
   "El MIB (Buró Médico) verifica tu información según el proceso federal de aprobación",
   "De acuerdo a tu perfil, se te asigna la aseguradora que mejor se adapte a tu caso.",

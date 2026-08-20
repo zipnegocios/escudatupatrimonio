@@ -7,7 +7,8 @@ export function DEstatus() {
   return (
     <ExitScreen
       title="Gracias por tu tiempo"
-      body="Actualmente el programa requiere algún tipo de estatus legal en los Estados Unidos. Anotamos tu información para mantenerte al tanto si tu situación cambia en el futuro."
+      body="Este programa requiere cierto estatus legal en los Estados Unidos. Escribile directo a un agente por WhatsApp para conversar qué opciones existen para tu situación."
+      whatsappReason="mi estatus migratorio actual"
     />
   );
 }

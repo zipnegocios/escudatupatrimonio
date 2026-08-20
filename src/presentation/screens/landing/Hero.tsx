@@ -32,14 +32,14 @@ export function Hero({ onContinue }: HeroProps) {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={BRAND_LOGO_URL} alt="Escuda tu Patrimonio" className="h-24 lg:h-32 w-auto self-start mb-2" />
           <p className="type-eyebrow" style={{ color: "var(--gold-text)" }}>
-            Evaluación gratuita · 4 minutos
+            Evaluación gratuita
           </p>
           <h1 className="type-title lg:!text-[42px]">
             ¿Calificas para el programa de ahorro y protección?
           </h1>
           <p className="type-subtitle max-w-[480px]">
-            Descubre en menos de 4 minutos si tu perfil cumple los requisitos de
-            este programa respaldado por aseguradoras líderes.
+            Descubre si tu perfil cumple los requisitos de este programa
+            respaldado por aseguradoras líderes.
           </p>
           <div className="mt-2 max-w-[380px]">
             <CTAButton label="Verificar mi elegibilidad ahora →" onClick={onContinue} />

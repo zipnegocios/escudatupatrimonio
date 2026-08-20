@@ -39,8 +39,9 @@ export function InfoNlg({ onChoice }: ScreenComponentProps) {
           ))}
         </div>
         <p className="type-body">
-          De acuerdo a tu perfil, el MIB (Buró Médico) y la aseguradora que
-          mejor se adapte a tu caso evalúan tu solicitud — ninguna de estas
+          El MIB (Buró Médico) verifica tu información como parte del
+          proceso de aprobación, y de acuerdo a tu perfil se te asigna la
+          aseguradora que mejor se adapte a tu caso — ninguna de estas
           compañías puede desaparecer ni dejar de pagar.
         </p>
         {/* eslint-disable-next-line @next/next/no-img-element */}

@@ -1,9 +1,7 @@
 /**
  * Constantes hardcodeadas para la fase fundacional (solo frontend, sin
- * backend). AGENT_INFO todavía tiene algunos valores placeholder
- * claramente ficticios (phone, whatsapp, state) — reemplazar con los
- * datos reales de Luis Moreno Rangel antes de producción. `license` y
- * `photo` ya son datos reales.
+ * backend). `state` no se usa en ningún lado (queda como placeholder sin
+ * impacto). El resto de AGENT_INFO ya son datos reales de Luis Moreno Rangel.
  */
 // NOTA: el logo real (BRAND_ICON_URL/BRAND_LOGO_URL) dice "ESCUDA tu
 // Patrimonio", no "Escudo". Se corrige aquí para calzar con el asset de
@@ -15,8 +13,8 @@ export const AGENT_INFO = {
   name: "Luis Moreno Rangel",
   license: "19655234", // NPN real (National Producer Number, verificable en nipr.com)
   state: "FL", // PLACEHOLDER — estado principal de licencia
-  phone: "+1-000-000-0000", // PLACEHOLDER
-  whatsapp: "10000000000", // PLACEHOLDER (formato E.164 sin '+', para wa.me)
+  phone: "+1-305-505-2886",
+  whatsapp: "13055052886", // formato E.164 sin '+', para wa.me
   photo: "/brand/luis.png",
   company: "National Life Group",
 } as const;

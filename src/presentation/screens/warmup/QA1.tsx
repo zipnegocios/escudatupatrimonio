@@ -15,7 +15,6 @@ export function QA1({ onChoice }: ScreenComponentProps) {
         { value: "CORTO", label: "En los próximos 5 años" },
         { value: "MEDIO", label: "Entre 5 y 15 años" },
         { value: "LARGO", label: "En más de 15 años" },
-        { value: "ABIERTO", label: "Cuando lo necesite — es mi fondo de emergencia" },
       ]}
     />
   );

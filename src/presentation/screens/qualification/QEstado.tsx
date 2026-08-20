@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { ScreenWrapper } from "@/presentation/components/ScreenWrapper";
 import { ProgressBar } from "@/presentation/components/ProgressBar";
-import { StateSelector } from "@/presentation/components/StateSelector";
+import { UsStatesMap } from "@/presentation/components/UsStatesMap";
 import { headerIn } from "@/presentation/animations/gsap-micro";
 import type { ScreenComponentProps } from "@/presentation/screens/screen-registry";
 
@@ -25,7 +25,9 @@ export function QEstado({ onChoice }: ScreenComponentProps) {
         <p className="type-caption">Cada estado tiene diferentes opciones y regulaciones</p>
         <h1 className="type-title">¿En qué estado de EE.UU. resides actualmente?</h1>
       </div>
-      <StateSelector onSelect={onChoice} />
+      <div className="flex-1 min-h-0 overflow-y-auto flex items-start justify-center pb-4">
+        <UsStatesMap onSelect={onChoice} />
+      </div>
     </ScreenWrapper>
   );
 }

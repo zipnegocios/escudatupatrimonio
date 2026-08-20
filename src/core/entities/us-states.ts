@@ -1,10 +1,9 @@
 /**
  * Los 50 estados + DC + PR, con zona horaria IANA y si Luis tiene licencia
- * activa ahí. La lista `licensed` es un PLACEHOLDER — Luis no proporcionó su
- * lista real de estados licenciados (ver plan, sección "Identidad del
- * agente"). Reemplazar `LICENSED_STATES` con los códigos reales antes de
- * producción; mientras tanto se usa un subconjunto de ejemplo para poder
- * probar ambas ramas de `Q_ESTADO` (con y sin licencia → REFERIDO).
+ * activa ahí. Por decisión de Luis (2026-08-20) se habilitan todos los
+ * estados — la licencia se resuelve rápido caso por caso, no debe frenar el
+ * flujo. `Q_ESTADO_REF` (rama "sin licencia → REFERIDO") queda en el código
+ * como red de seguridad si en el futuro hiciera falta restringir de nuevo.
  */
 
 export interface UsState {
@@ -68,14 +67,7 @@ export const US_STATES: readonly UsState[] = [
   { code: "PR", name: "Puerto Rico", timezone: "America/Puerto_Rico" },
 ];
 
-/** PLACEHOLDER — reemplazar con los estados reales donde Luis tiene licencia. */
-export const LICENSED_STATES: ReadonlySet<string> = new Set([
-  "FL",
-  "TX",
-  "GA",
-  "NC",
-  "NY",
-]);
+export const LICENSED_STATES: ReadonlySet<string> = new Set(US_STATES.map((s) => s.code));
 
 export function isLicensedState(code: string): boolean {
   return LICENSED_STATES.has(code);
