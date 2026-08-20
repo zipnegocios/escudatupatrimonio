@@ -40,7 +40,7 @@ export function S5({ onChoice }: ScreenComponentProps) {
   }, [showFact]);
 
   return (
-    <div className="relative w-full h-full bg-bg-primary overflow-hidden">
+    <div className="relative mx-auto h-full w-full max-w-[560px] bg-bg-primary overflow-hidden">
       <WebGLCanvas sceneSetup={profileBuildScene} />
       <div className="absolute inset-0 flex flex-col items-center justify-end pb-16 px-8">
         <p ref={actionRef} className="text-center type-label text-text-secondary mb-3 opacity-0">

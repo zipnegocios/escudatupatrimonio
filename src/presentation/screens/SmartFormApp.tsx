@@ -52,7 +52,16 @@ export function SmartFormApp() {
   };
 
   return (
-    <div className="relative w-full h-dvh bg-bg-primary overflow-hidden">
+    <div
+      className="relative w-full h-dvh overflow-hidden"
+      // Solo se ve en desktop, en los márgenes a los costados de la columna
+      // centrada de cada pantalla (ScreenWrapper/StimScreen la tapan por
+      // completo en mobile, donde el viewport es más angosto que su tope de
+      // ancho) — un halo sutil en vez de dejar el espacio sobrante vacío.
+      style={{
+        background: "radial-gradient(circle at 50% 50%, var(--gold-glow) 0%, var(--bg-deep) 60%)",
+      }}
+    >
       {showBackButton && <BackButton onClick={handleBack} />}
       {Screen ? (
         <Screen vars={vars} onChoice={navigate} />

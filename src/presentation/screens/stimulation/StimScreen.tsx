@@ -43,7 +43,10 @@ export function StimScreen({
   }, [minDurationMs]);
 
   return (
-    <div className="relative w-full h-full bg-bg-trust-dark overflow-hidden" onClick={handleTap}>
+    <div
+      className="relative mx-auto h-full w-full max-w-[560px] bg-bg-trust-dark overflow-hidden"
+      onClick={handleTap}
+    >
       {sceneSetup ? (
         <WebGLCanvas sceneSetup={sceneSetup} />
       ) : (
