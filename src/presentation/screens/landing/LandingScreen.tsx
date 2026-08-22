@@ -12,7 +12,6 @@ import { InstitutionalReframe } from "@/presentation/screens/landing/Institution
 import { Process } from "@/presentation/screens/landing/Process";
 import { AuthorityVideos } from "@/presentation/screens/landing/AuthorityVideos";
 import { SocialProof } from "@/presentation/screens/landing/SocialProof";
-import { FinalCTA } from "@/presentation/screens/landing/FinalCTA";
 import { FloatingCTA } from "@/presentation/screens/landing/FloatingCTA";
 import { WhatsAppFloatingButton } from "@/presentation/components/WhatsAppFloatingButton";
 import type { ScreenComponentProps } from "@/presentation/screens/screen-registry";
@@ -49,11 +48,8 @@ export function LandingScreen({ onChoice }: ScreenComponentProps) {
       <LandingSection className="bg-bg-trust-dark">
         <AuthorityVideos />
       </LandingSection>
-      <LandingSection className="bg-bg-elevated">
+      <LandingSection className="bg-bg-elevated mb-24 md:mb-32">
         <SocialProof />
-      </LandingSection>
-      <LandingSection width="narrow">
-        <FinalCTA onContinue={handleContinue} />
       </LandingSection>
       <FloatingCTA onContinue={handleContinue} />
       <WhatsAppFloatingButton />

@@ -4,7 +4,7 @@ interface AgentCardProps {
   size?: "medium" | "large";
 }
 
-/** Tarjeta del agente reutilizada en INFO_AGENTE, PRE_4, E5_FINAL y la landing (FinalCTA). */
+/** Tarjeta del agente reutilizada en INFO_AGENTE, PRE_4 y E5_FINAL. */
 export function AgentCard({ size = "medium" }: AgentCardProps) {
   const photoSize = size === "large" ? "w-28 h-28" : "w-20 h-20";
   return (
