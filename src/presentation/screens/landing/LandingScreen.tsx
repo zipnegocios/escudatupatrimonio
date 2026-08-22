@@ -16,7 +16,7 @@ import { FinalCTA } from "@/presentation/screens/landing/FinalCTA";
 import { WhatsAppFloatingButton } from "@/presentation/components/WhatsAppFloatingButton";
 import type { ScreenComponentProps } from "@/presentation/screens/screen-registry";
 
-// copy: spec de rediseño v1.0 "Escuda tu Patrimonio" — 9 secciones (§2.1-2.9)
+// copy: spec de rediseño v1.0 "Protege tu Patrimonio" — 9 secciones (§2.1-2.9)
 export function LandingScreen({ onChoice }: ScreenComponentProps) {
   const setUtmCampaign = useFormStore((s) => s.setUtmCampaign);
 

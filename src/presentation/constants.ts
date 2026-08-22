@@ -3,11 +3,7 @@
  * backend). `state` no se usa en ningún lado (queda como placeholder sin
  * impacto). El resto de AGENT_INFO ya son datos reales de Luis Moreno Rangel.
  */
-// NOTA: el logo real (BRAND_ICON_URL/BRAND_LOGO_URL) dice "ESCUDA tu
-// Patrimonio", no "Escudo". Se corrige aquí para calzar con el asset de
-// marca — confirmar con Gustavo si el logo tiene el error tipográfico en
-// vez del código.
-export const BRAND_NAME = "Escuda tu Patrimonio";
+export const BRAND_NAME = "Protege tu Patrimonio";
 
 export const AGENT_INFO = {
   name: "Luis Moreno Rangel",
@@ -35,7 +31,7 @@ const ASSET_BASE = "https://pub-beb16d388e93409591cbfdda046059d6.r2.dev/vid";
 const BRAND_BASE = "/brand";
 
 /** Logo completo de marca (navy + oro) — usado en el Hero de la landing. */
-export const BRAND_LOGO_URL = `${BRAND_BASE}/escuda-tu-patrimonio-logo.png`;
+export const BRAND_LOGO_URL = `${BRAND_BASE}/protege-tu-patrimonio-logo.png`;
 /** Ícono cuadrado de marca — usado como favicon (ver metadata.icons en src/app/layout.tsx). */
 export const BRAND_ICON_URL = `${BRAND_BASE}/icono.png`;
 /** Logo del MIB (Medical Information Bureau) — usado en la Sección 2.5 (reencuadre institucional). */

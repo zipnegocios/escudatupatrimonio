@@ -30,7 +30,7 @@ export function Hero({ onContinue }: HeroProps) {
       <div className="relative mx-auto w-full max-w-[1120px] px-6 py-24 lg:py-0 grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] lg:items-center gap-10 lg:gap-16">
         <div ref={ref} className="flex flex-col gap-4">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={BRAND_LOGO_URL} alt="Escuda tu Patrimonio" className="h-24 lg:h-32 w-auto self-start mb-2" />
+          <img src={BRAND_LOGO_URL} alt="Protege tu Patrimonio" className="h-24 lg:h-32 w-auto self-start mb-2" />
           <p className="type-eyebrow" style={{ color: "var(--gold-text)" }}>
             Evaluación gratuita
           </p>
