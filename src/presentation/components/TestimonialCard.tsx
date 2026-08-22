@@ -6,6 +6,8 @@ interface TestimonialCardPlaceholderProps {
   /** SOLO para pruebas manuales en local o preview interno. Nunca invocar con este mode en un archivo que se despliega a producción real — ver el guard más abajo. */
   mode: "placeholder";
   quote: string;
+  authorName?: string;
+  rating?: number;
 }
 
 interface TestimonialCardVerifiedWrittenProps {
@@ -14,6 +16,7 @@ interface TestimonialCardVerifiedWrittenProps {
   authorName: string;
   authorPhoto: string;
   authorLocation?: string;
+  rating?: number;
   source: "written";
 }
 
@@ -23,6 +26,7 @@ interface TestimonialCardVerifiedLinkedProps {
   authorName: string;
   authorPhoto: string;
   authorLocation?: string;
+  rating?: number;
   source: "google_review" | "trustpilot" | "video";
   /** Enlace verificable a la reseña/video real — obligatorio cuando la fuente no es texto propio. */
   sourceUrl: string;
@@ -41,17 +45,75 @@ const SOURCE_LABEL: Record<string, string> = {
   video: "Video testimonio",
 };
 
+function initials(name: string): string {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]!.toUpperCase())
+    .join("");
+}
+
+function Avatar({ name, photoUrl }: { name?: string; photoUrl?: string }) {
+  if (photoUrl) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={photoUrl}
+        alt={name ?? ""}
+        className="w-12 h-12 rounded-full object-cover flex-shrink-0 border border-border-card"
+        loading="lazy"
+      />
+    );
+  }
+  if (name) {
+    return (
+      <div className="w-12 h-12 rounded-full bg-bg-elevated flex items-center justify-center flex-shrink-0 type-label font-semibold text-text-primary">
+        {initials(name)}
+      </div>
+    );
+  }
+  return (
+    <div className="w-12 h-12 rounded-full bg-bg-elevated flex items-center justify-center flex-shrink-0">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="1.5">
+        <circle cx="12" cy="8" r="4" />
+        <path d="M4 20c0-4 3.5-6 8-6s8 2 8 6" />
+      </svg>
+    </div>
+  );
+}
+
+function StarRating({ rating }: { rating: number }) {
+  return (
+    <div className="flex gap-0.5" aria-label={`${rating} de 5 estrellas`}>
+      {Array.from({ length: 5 }, (_, i) => (
+        <svg
+          key={i}
+          width="14"
+          height="14"
+          viewBox="0 0 20 20"
+          fill={i < rating ? "var(--gold-primary)" : "var(--border-card)"}
+        >
+          <path d="M10 1.5l2.6 5.6 6.1.6-4.6 4.1 1.4 6-5.5-3.2-5.5 3.2 1.4-6-4.6-4.1 6.1-.6z" />
+        </svg>
+      ))}
+    </div>
+  );
+}
+
 /**
  * Tarjeta de testimonio con tres estados:
  * - sin `mode`: estado "Próximamente" — el único seguro para producción
  *   mientras no existan testimonios reales.
- * - `mode="placeholder"`: contenido ilustrativo genérico sin nombre/foto
- *   real, para previsualización en desarrollo y en deploys de staging/
- *   preview (revisión interna con Gustavo/Johanaly/Luis). Lanza un error
- *   visible si se renderiza en el build de producción real, para que
- *   nunca llegue a un usuario real por accidente (NAIC MDL-570 / FTC
- *   Endorsement Guides: un testimonio publicitado debe ser de una persona
- *   real e identificable).
+ * - `mode="placeholder"`: contenido ilustrativo genérico (nombre incluido
+ *   solo para maquetar el layout — nunca una persona real), para
+ *   previsualización en desarrollo y en deploys de staging/preview
+ *   (revisión interna con Gustavo/Johanaly/Luis). Lanza un error visible
+ *   si se renderiza en el build de producción real, para que nunca llegue
+ *   a un usuario real por accidente (NAIC MDL-570 / FTC Endorsement
+ *   Guides: un testimonio publicitado debe ser de una persona real e
+ *   identificable) — por eso su insignia dice "Ejemplo ilustrativo" y
+ *   nunca "Evaluación verificada", aunque comparta el mismo layout.
  * - `mode="verified"`: testimonio real, requiere autor, foto y fuente
  *   verificable.
  *
@@ -86,46 +148,47 @@ export function TestimonialCard(props: TestimonialCardProps) {
     );
   }
 
-  if (props.mode === "placeholder") {
-    return (
-      <div className="relative p-5 rounded-2xl border border-border-card bg-bg-surface overflow-hidden">
-        <div
-          className="absolute inset-0 opacity-[0.06] pointer-events-none"
-          style={{
-            backgroundImage:
-              "repeating-linear-gradient(45deg, var(--text-primary) 0, var(--text-primary) 1px, transparent 1px, transparent 12px)",
-          }}
-        />
-        <span
-          className="relative inline-block mb-3 px-2 py-0.5 rounded-full bg-caution-bg type-caption font-semibold"
-          style={{ color: "var(--caution)" }}
-        >
-          Ejemplo ilustrativo — no publicar
-        </span>
-        <p className="relative type-body italic">&ldquo;{props.quote}&rdquo;</p>
-      </div>
-    );
-  }
+  const rating = props.rating ?? 5;
 
   return (
-    <div className="p-5 rounded-2xl border border-border-card bg-bg-surface">
-      <p className="type-body italic mb-4">&ldquo;{props.quote}&rdquo;</p>
-      <div className="flex items-center gap-3">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={props.authorPhoto}
-          alt={props.authorName}
-          className="w-11 h-11 rounded-full object-cover border border-border-card"
-          loading="lazy"
+    <div className="relative flex flex-col p-5 rounded-2xl border border-border-card bg-bg-surface transition-all duration-200 hover:shadow-md hover:-translate-y-1">
+      <div className="flex items-start gap-4 mb-3">
+        <Avatar
+          name={props.authorName}
+          photoUrl={props.mode === "verified" ? props.authorPhoto : undefined}
         />
-        <div className="min-w-0">
-          <p className="type-label leading-tight">{props.authorName}</p>
-          <p className="type-caption">
-            {props.authorLocation ? `${props.authorLocation} · ` : ""}
-            {SOURCE_LABEL[props.source]}
+        <div className="min-w-0 flex flex-col gap-1">
+          <p className="type-label font-semibold text-text-primary truncate">
+            {props.authorName ?? "Cliente"}
           </p>
+          <StarRating rating={rating} />
+          {props.mode === "verified" && (
+            <p className="type-caption text-text-muted truncate">
+              {props.authorLocation ? `${props.authorLocation} · ` : ""}
+              {SOURCE_LABEL[props.source]}
+            </p>
+          )}
+        </div>
+        <div className="ml-auto flex-shrink-0 flex items-center gap-1 pl-2">
+          {props.mode === "verified" ? (
+            <>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--success)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 12l5 5L20 6" />
+              </svg>
+              <span className="text-[10px] text-text-muted uppercase tracking-wide whitespace-nowrap">
+                Evaluación verificada
+              </span>
+            </>
+          ) : (
+            <span className="text-[10px] uppercase tracking-wide whitespace-nowrap font-semibold" style={{ color: "var(--caution)" }}>
+              Ejemplo ilustrativo
+            </span>
+          )}
         </div>
       </div>
+
+      <p className="type-body italic text-text-secondary">&ldquo;{props.quote}&rdquo;</p>
+
       {"sourceUrl" in props && (
         <a
           href={props.sourceUrl}
