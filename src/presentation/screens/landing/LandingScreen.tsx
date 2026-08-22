@@ -13,6 +13,7 @@ import { Process } from "@/presentation/screens/landing/Process";
 import { AuthorityVideos } from "@/presentation/screens/landing/AuthorityVideos";
 import { SocialProof } from "@/presentation/screens/landing/SocialProof";
 import { FinalCTA } from "@/presentation/screens/landing/FinalCTA";
+import { FloatingCTA } from "@/presentation/screens/landing/FloatingCTA";
 import { WhatsAppFloatingButton } from "@/presentation/components/WhatsAppFloatingButton";
 import type { ScreenComponentProps } from "@/presentation/screens/screen-registry";
 
@@ -29,7 +30,7 @@ export function LandingScreen({ onChoice }: ScreenComponentProps) {
 
   return (
     <LandingWrapper>
-      <Hero onContinue={handleContinue} />
+      <Hero />
       <LandingSection>
         <AuthorityBar />
       </LandingSection>
@@ -54,6 +55,7 @@ export function LandingScreen({ onChoice }: ScreenComponentProps) {
       <LandingSection width="narrow">
         <FinalCTA onContinue={handleContinue} />
       </LandingSection>
+      <FloatingCTA onContinue={handleContinue} />
       <WhatsAppFloatingButton />
     </LandingWrapper>
   );

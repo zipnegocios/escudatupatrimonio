@@ -198,3 +198,32 @@ textarea {
   font-weight: 400;
   color: var(--text-muted);
 }
+
+/* Brillo metalizado del CTA flotante — barrido de luz en bucle yoyo sobre
+   el dorado sólido, ver CTAButton.tsx (prop `shine`). */
+@keyframes cta-shine-sweep {
+  from {
+    transform: translateX(-150%) skewX(-45deg);
+  }
+  to {
+    transform: translateX(150%) skewX(-45deg);
+  }
+}
+
+.cta-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-shine::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+  transform: translateX(-150%) skewX(-45deg);
+  animation: cta-shine-sweep 2.6s ease-in-out infinite alternate;
+  pointer-events: none;
+}
