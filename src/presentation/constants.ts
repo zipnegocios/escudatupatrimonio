@@ -36,8 +36,6 @@ export const BRAND_LOGO_URL = `${BRAND_BASE}/protege-tu-patrimonio-logo.png`;
 export const BRAND_ICON_URL = `${BRAND_BASE}/icono.png`;
 /** Logo del MIB (Medical Information Bureau) — usado en la Sección 2.5 (reencuadre institucional). */
 export const MIB_LOGO_URL = `${BRAND_BASE}/mib-logo.png`;
-/** Sello de trayectoria (100+ años) — usado en AuthorityBar (Sección 2.2). */
-export const TRAYECTORIA_URL = `${BRAND_BASE}/trayectoria.png`;
 
 /**
  * Los 2 videos explicativos de Luis (Sección 2.7 — contenido de
